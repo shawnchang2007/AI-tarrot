@@ -58,21 +58,24 @@ function parseModelReading(result) {
     result?.result?.response ||
     "";
 
-  if (typeof content !== "string" || !content.trim()) return null;
-
-  const cleaned = content
-    .trim()
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/, "");
-  const objectStart = cleaned.indexOf("{");
-  const objectEnd = cleaned.lastIndexOf("}");
-  const jsonText =
-    objectStart >= 0 && objectEnd > objectStart
-      ? cleaned.slice(objectStart, objectEnd + 1)
-      : cleaned;
-
   try {
-    const parsed = JSON.parse(jsonText);
+    let parsed = content;
+    if (typeof content === "string") {
+      if (!content.trim()) return null;
+      const cleaned = content
+        .trim()
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/, "");
+      const objectStart = cleaned.indexOf("{");
+      const objectEnd = cleaned.lastIndexOf("}");
+      const jsonText =
+        objectStart >= 0 && objectEnd > objectStart
+          ? cleaned.slice(objectStart, objectEnd + 1)
+          : cleaned;
+      parsed = JSON.parse(jsonText);
+    }
+
+    if (!parsed || typeof parsed !== "object") return null;
     if (!parsed.summary || !parsed.encouragement) return null;
     return {
       summary: String(parsed.summary),
@@ -140,6 +143,25 @@ export async function onRequestPost(context) {
         { role: "system", content: systemPrompt },
         { role: "user", content: buildPrompt(question, safeCards) },
       ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          type: "object",
+          properties: {
+            summary: { type: "string" },
+            connections: { type: "string" },
+            encouragement: { type: "string" },
+            actions: {
+              type: "array",
+              items: { type: "string" },
+              minItems: 3,
+              maxItems: 3,
+            },
+            reflection: { type: "string" },
+          },
+          required: ["summary", "connections", "encouragement", "actions", "reflection"],
+        },
+      },
       temperature: 0.7,
       max_tokens: 900,
     });
