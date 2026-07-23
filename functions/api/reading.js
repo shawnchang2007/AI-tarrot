@@ -15,15 +15,15 @@ function createFallbackReading(question, cards) {
   const sharedKeywords = [...new Set(cards.flatMap((card) => card.keywords || []))].slice(0, 4);
 
   return {
-    summary: `这组牌邀请你在“${sharedKeywords.slice(0, 2).join("与") || "觉察与行动"}”之间找到自己的节奏。`,
-    connections: `${first.position}上的${first.name}${first.orientation}，提醒你先看见当下真正需要被照顾的部分；${last.position}上的${last.name}${last.orientation}，则把视线带向可以主动选择的方向。正位与逆位都不是好坏，而是不同角度的提醒。`,
-    encouragement: `你不必一次解决“${question}”里的所有不确定。愿意停下来提问，本身就说明你正在认真对待自己的感受，也已经迈出了改变的第一步。`,
+    summary: `These cards invite you to find your rhythm between ${sharedKeywords.slice(0, 2).join(" and ") || "awareness and action"}.`,
+    connections: `${first.name} ${first.orientation.toLowerCase()} in “${first.position}” asks you to notice what needs care right now. ${last.name} ${last.orientation.toLowerCase()} in “${last.position}” gently turns your attention toward what you can choose. Upright and reversed are not good or bad—only different angles of reflection.`,
+    encouragement: `You do not have to resolve every uncertainty inside “${question}” at once. The fact that you paused to ask means you are taking your feelings seriously, and that is already a meaningful first step.`,
     actions: [
-      `写下现在最让你在意的一件事，并区分“事实”和“我的猜测”。`,
-      `从“${sharedKeywords[0] || "温柔坚定"}”出发，选择一个今天就能完成的小行动。`,
-      `给自己一个观察期限，再根据真实变化调整方向。`,
+      `Write down the one thing that matters most right now, then separate what you know from what you are assuming.`,
+      `Starting from “${sharedKeywords[0] || "gentle resolve"},” choose one small action you can complete today.`,
+      `Give yourself a clear time to observe what changes, then adjust using what is actually happening.`,
     ],
-    reflection: "如果不需要立刻证明自己做得对，你真正想选择的方向是什么？",
+    reflection: "If you did not have to prove that your choice was right, what direction would you honestly want to explore?",
   };
 }
 
@@ -31,23 +31,23 @@ function buildPrompt(question, cards) {
   const spread = cards
     .map(
       (card, index) =>
-        `${index + 1}. 位置：${card.position}；牌：${card.name}（${card.en}）；方向：${card.orientation}；关键词：${card.keywords.join("、")}`,
+        `${index + 1}. Position: ${card.position}; card: ${card.name} (${card.en}); orientation: ${card.orientation}; keywords: ${card.keywords.join(", ")}`,
     )
     .join("\n");
 
-  return `用户的问题：
+  return `The user's question:
 ${question}
 
-本次牌阵：
+The spread:
 ${spread}
 
-请结合牌阵位置、牌义、正逆位以及牌与牌之间的关系来回应。正位与逆位代表能量呈现角度，不代表简单的好坏。输出必须是一个 JSON 对象，不要使用 Markdown 代码块，格式如下：
+Connect the spread positions, card meanings, orientations, and relationships between the cards. Upright and reversed describe different ways an energy may be expressed; they do not mean simply good or bad. Return only a JSON object without a Markdown code fence:
 {
-  "summary": "一句温柔但具体的核心主题，35字以内",
-  "connections": "解释牌面之间的联系，120-220字",
-  "encouragement": "贴合问题的鼓励，80-160字",
-  "actions": ["具体可执行的小行动1", "具体可执行的小行动2", "具体可执行的小行动3"],
-  "reflection": "一个帮助用户继续自我探索的问题"
+  "summary": "a gentle and specific core theme in 12 words or fewer",
+  "connections": "how the cards and positions connect, 90-150 words",
+  "encouragement": "grounded encouragement tailored to the question, 60-100 words",
+  "actions": ["specific small action 1", "specific small action 2", "specific small action 3"],
+  "reflection": "one thoughtful question for continued reflection"
 }`;
 }
 
@@ -97,25 +97,25 @@ export async function onRequestPost(context) {
   try {
     payload = await context.request.json();
   } catch {
-    return response({ error: "请求格式不正确。" }, 400);
+    return response({ error: "The request format is not valid." }, 400);
   }
 
   const question = String(payload?.question || "").trim();
   const cards = Array.isArray(payload?.cards) ? payload.cards : [];
 
   if (question.length < 4 || question.length > 240) {
-    return response({ error: "问题需要在 4 到 240 个字之间。" }, 400);
+    return response({ error: "Your question needs to be between 4 and 240 characters." }, 400);
   }
 
   if (![1, 3, 5].includes(cards.length)) {
-    return response({ error: "请选择一张、三张或五张牌。" }, 400);
+    return response({ error: "Please choose a one-, three-, or five-card spread." }, 400);
   }
 
   const safeCards = cards.map((card) => ({
     name: String(card?.name || "").slice(0, 30),
     en: String(card?.en || "").slice(0, 50),
     position: String(card?.position || "").slice(0, 30),
-    orientation: card?.orientation === "逆位" ? "逆位" : "正位",
+    orientation: card?.orientation === "Reversed" ? "Reversed" : "Upright",
     keywords: Array.isArray(card?.keywords)
       ? card.keywords.slice(0, 4).map((keyword) => String(keyword).slice(0, 20))
       : [],
@@ -128,14 +128,14 @@ export async function onRequestPost(context) {
     });
   }
 
-  const systemPrompt = `你是 Soluna，一位温柔、清醒、尊重用户自主性的塔罗自我探索引导者。
-你的目标不是预言未来，而是借助牌面帮助用户整理感受、发现资源并形成小而可行的下一步。
-请遵守：
-1. 使用自然、克制、温暖的简体中文，避免空泛套话。
-2. 不断言他人的内心，不承诺事件必然发生，不制造恐惧或依赖。
-3. 不把塔罗作为医疗、法律、投资或重大人生决策的依据。
-4. 先忠实解释牌面，再结合用户问题；将推测表达为可能性。
-5. 鼓励用户保留选择权，行动建议必须现实、温和、非操控性。`;
+  const systemPrompt = `You are Soluna, a warm, clear-minded tarot reflection guide who respects the user's autonomy.
+Your purpose is not to predict the future. Use the cards to help the user organize their feelings, notice their resources, and find a small, realistic next step.
+Follow these principles:
+1. Write in natural, restrained, warm English. Avoid vague spiritual clichés.
+2. Never claim to know another person's private thoughts, promise that an event will happen, or create fear or dependence.
+3. Never present tarot as a basis for medical, legal, financial, or other high-stakes decisions.
+4. Explain the cards faithfully before connecting them to the question. Present interpretation as possibility, not fact.
+5. Keep the user's agency central. Suggestions must be practical, gentle, and non-manipulative.`;
 
   try {
     const result = await context.env.AI.run(MODEL, {
