@@ -64,9 +64,15 @@ function parseModelReading(result) {
     .trim()
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/, "");
+  const objectStart = cleaned.indexOf("{");
+  const objectEnd = cleaned.lastIndexOf("}");
+  const jsonText =
+    objectStart >= 0 && objectEnd > objectStart
+      ? cleaned.slice(objectStart, objectEnd + 1)
+      : cleaned;
 
   try {
-    const parsed = JSON.parse(cleaned);
+    const parsed = JSON.parse(jsonText);
     if (!parsed.summary || !parsed.encouragement) return null;
     return {
       summary: String(parsed.summary),
@@ -141,12 +147,12 @@ export async function onRequestPost(context) {
     const reading = parseModelReading(result);
     return response({
       reading: reading || createFallbackReading(question, safeCards),
-      source: reading ? "workers-ai" : "card-meanings",
+      source: reading ? "workers-ai" : "ai-unparsed",
     });
   } catch {
     return response({
       reading: createFallbackReading(question, safeCards),
-      source: "card-meanings",
+      source: "ai-error",
     });
   }
 }
