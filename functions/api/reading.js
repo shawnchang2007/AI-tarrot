@@ -1,4 +1,4 @@
-const MODEL = "@cf/zai-org/glm-4.7-flash";
+const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 
 const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
@@ -135,7 +135,7 @@ export async function onRequestPost(context) {
         { role: "user", content: buildPrompt(question, safeCards) },
       ],
       temperature: 0.7,
-      max_completion_tokens: 900,
+      max_tokens: 900,
     });
 
     const reading = parseModelReading(result);
