@@ -1,4 +1,6 @@
-const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+const WORKERS_AI_MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+const DEFAULT_DEEPSEEK_MODEL = "deepseek-v4-flash";
 
 const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
@@ -91,6 +93,33 @@ function parseModelReading(result) {
   }
 }
 
+async function requestDeepSeek(env, systemPrompt, userPrompt) {
+  const apiResponse = await fetch(DEEPSEEK_API_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${env.DEEPSEEK_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: env.DEEPSEEK_MODEL || DEFAULT_DEEPSEEK_MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+      thinking: { type: "disabled" },
+      temperature: 0.7,
+      max_tokens: 900,
+    }),
+  });
+
+  if (!apiResponse.ok) {
+    throw new Error(`DeepSeek returned ${apiResponse.status}`);
+  }
+
+  return apiResponse.json();
+}
+
 export async function onRequestPost(context) {
   let payload;
 
@@ -121,13 +150,6 @@ export async function onRequestPost(context) {
       : [],
   }));
 
-  if (!context.env?.AI) {
-    return response({
-      reading: createFallbackReading(question, safeCards),
-      source: "card-meanings",
-    });
-  }
-
   const systemPrompt = `You are Soluna, a warm, clear-minded tarot reflection guide who respects the user's autonomy.
 Your purpose is not to predict the future. Use the cards to help the user organize their feelings, notice their resources, and find a small, realistic next step.
 Follow these principles:
@@ -136,47 +158,63 @@ Follow these principles:
 3. Never present tarot as a basis for medical, legal, financial, or other high-stakes decisions.
 4. Explain the cards faithfully before connecting them to the question. Present interpretation as possibility, not fact.
 5. Keep the user's agency central. Suggestions must be practical, gentle, and non-manipulative.`;
+  const userPrompt = buildPrompt(question, safeCards);
 
-  try {
-    const result = await context.env.AI.run(MODEL, {
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: buildPrompt(question, safeCards) },
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          type: "object",
-          properties: {
-            summary: { type: "string" },
-            connections: { type: "string" },
-            encouragement: { type: "string" },
-            actions: {
-              type: "array",
-              items: { type: "string" },
-              minItems: 3,
-              maxItems: 3,
-            },
-            reflection: { type: "string" },
-          },
-          required: ["summary", "connections", "encouragement", "actions", "reflection"],
-        },
-      },
-      temperature: 0.7,
-      max_tokens: 900,
-    });
-
-    const reading = parseModelReading(result);
-    return response({
-      reading: reading || createFallbackReading(question, safeCards),
-      source: reading ? "workers-ai" : "ai-unparsed",
-    });
-  } catch {
-    return response({
-      reading: createFallbackReading(question, safeCards),
-      source: "ai-error",
-    });
+  if (context.env?.DEEPSEEK_API_KEY) {
+    try {
+      const result = await requestDeepSeek(context.env, systemPrompt, userPrompt);
+      const reading = parseModelReading(result);
+      if (reading) {
+        return response({ reading, source: "deepseek" });
+      }
+    } catch {
+      // Continue to Workers AI or the deterministic fallback below.
+    }
   }
+
+  if (context.env?.AI) {
+    try {
+      const result = await context.env.AI.run(WORKERS_AI_MODEL, {
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            type: "object",
+            properties: {
+              summary: { type: "string" },
+              connections: { type: "string" },
+              encouragement: { type: "string" },
+              actions: {
+                type: "array",
+                items: { type: "string" },
+                minItems: 3,
+                maxItems: 3,
+              },
+              reflection: { type: "string" },
+            },
+            required: ["summary", "connections", "encouragement", "actions", "reflection"],
+          },
+        },
+        temperature: 0.7,
+        max_tokens: 900,
+      });
+
+      const reading = parseModelReading(result);
+      if (reading) {
+        return response({ reading, source: "workers-ai" });
+      }
+    } catch {
+      // Continue to the deterministic fallback below.
+    }
+  }
+
+  return response({
+    reading: createFallbackReading(question, safeCards),
+    source: "card-meanings",
+  });
 }
 
 export function onRequestGet() {
