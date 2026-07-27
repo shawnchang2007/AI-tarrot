@@ -38,27 +38,183 @@ function StarField() {
   );
 }
 
+const cardRealms = {
+  "Major Arcana": {
+    key: "major",
+    realm: "Aether · Archetype",
+    accent: "#f2d69b",
+    glow: "#9c78d8",
+    marker: "✦",
+  },
+  Wands: {
+    key: "wands",
+    realm: "Fire · Will",
+    accent: "#f2bd78",
+    glow: "#d56858",
+    marker: "✺",
+  },
+  Cups: {
+    key: "cups",
+    realm: "Water · Feeling",
+    accent: "#a7dcf0",
+    glow: "#547fc4",
+    marker: "☽",
+  },
+  Swords: {
+    key: "swords",
+    realm: "Air · Mind",
+    accent: "#d4d9f6",
+    glow: "#7798db",
+    marker: "✧",
+  },
+  Pentacles: {
+    key: "pentacles",
+    realm: "Earth · Form",
+    accent: "#c8d99a",
+    glow: "#71956d",
+    marker: "⛤",
+  },
+};
+
+function hashCardId(value) {
+  return [...value].reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 17);
+}
+
+function toRoman(number) {
+  const numerals = [
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"],
+  ];
+  let value = number;
+  let result = "";
+  numerals.forEach(([amount, symbol]) => {
+    while (value >= amount) {
+      result += symbol;
+      value -= amount;
+    }
+  });
+  return result || "0";
+}
+
+function getCardVisual(card) {
+  const realm = cardRealms[card.arcana] || cardRealms["Major Arcana"];
+  const seed = hashCardId(card.id);
+  const majorNumber = card.id.startsWith("major-") ? Number(card.id.split("-")[1]) : null;
+  const minorNumber = card.id.startsWith(`${realm.key}-`)
+    ? Number(card.id.split("-")[1])
+    : 1;
+  const stars = Array.from({ length: 8 }, (_, index) => ({
+    id: `${card.id}-star-${index}`,
+    left: `${12 + ((seed + index * 29) % 76)}%`,
+    top: `${9 + (((seed >> 3) + index * 37) % 60)}%`,
+    size: `${index % 3 === 0 ? 5 : index % 2 === 0 ? 3 : 2}px`,
+    delay: `${(index % 5) * 0.45}s`,
+  }));
+  const lines = Array.from({ length: 6 }, (_, index) => ({
+    id: `${card.id}-line-${index}`,
+    left: `${14 + ((seed + index * 19) % 57)}%`,
+    top: `${15 + (((seed >> 2) + index * 31) % 50)}%`,
+    width: `${28 + ((seed + index * 13) % 34)}px`,
+    rotation: `${-52 + ((seed + index * 47) % 104)}deg`,
+  }));
+
+  return {
+    ...realm,
+    number: majorNumber === null ? String(minorNumber).padStart(2, "0") : toRoman(majorNumber),
+    stars,
+    lines,
+  };
+}
+
 function TarotCard({ card, index, onReveal }) {
+  const visual = getCardVisual(card);
+
   return (
     <button
-      className={`tarot-card ${card.revealed ? "is-revealed" : ""}`}
+      className={`tarot-card card-realm-${visual.key} ${card.revealed ? "is-revealed" : ""}`}
       type="button"
       onClick={() => onReveal(index)}
       aria-label={card.revealed ? `${card.name}, ${card.orientation}` : `Reveal card ${index + 1}`}
+      style={{
+        "--card-accent": visual.accent,
+        "--card-glow": visual.glow,
+      }}
     >
       <span className="card-position">{card.position}</span>
       <span className="card-flip">
         <span className="card-face card-back">
-          <span className="orbit orbit-one" />
-          <span className="orbit orbit-two" />
-          <span className="moon-mark">◐</span>
+          <span className="back-star back-star-one">✦</span>
+          <span className="back-star back-star-two">·</span>
+          <span className="back-star back-star-three">✧</span>
+          <span className="back-orbit back-orbit-outer" />
+          <span className="back-orbit back-orbit-inner" />
+          <span className="back-axis back-axis-horizontal" />
+          <span className="back-axis back-axis-vertical" />
+          <span className="eclipse-sigil">
+            <span className="sigil-sun" />
+            <span className="sigil-moon" />
+            <span className="sigil-star">✦</span>
+          </span>
+          <span className="back-motto">AS ABOVE · SO WITHIN</span>
           <span className="back-brand">SOLUNA</span>
         </span>
-        <span className={`card-face card-front ${card.orientation === "Reversed" ? "is-reversed" : ""}`}>
-          <span className="card-number">{String(index + 1).padStart(2, "0")}</span>
-          <span className="card-glyph">{card.glyph}</span>
-          <span className="card-title">{card.name}</span>
-          <span className="card-title-en">{card.en}</span>
+        <span
+          className={`card-face card-front card-front-${visual.key} ${card.orientation === "Reversed" ? "is-reversed" : ""}`}
+        >
+          <span className="card-corner card-corner-top">
+            <span>{visual.marker}</span>
+            {visual.number}
+          </span>
+          <span className="card-corner card-corner-bottom">
+            <span>{visual.marker}</span>
+            {visual.number}
+          </span>
+          <span className="card-art-rotatable">
+            <span className="celestial-canvas" aria-hidden="true">
+              <span className="card-nebula" />
+              <span className="constellation-lines">
+                {visual.lines.map((line) => (
+                  <span
+                    key={line.id}
+                    style={{
+                      left: line.left,
+                      top: line.top,
+                      width: line.width,
+                      transform: `rotate(${line.rotation})`,
+                    }}
+                  />
+                ))}
+              </span>
+              <span className="constellation-stars">
+                {visual.stars.map((star) => (
+                  <span
+                    key={star.id}
+                    style={{
+                      left: star.left,
+                      top: star.top,
+                      width: star.size,
+                      height: star.size,
+                      animationDelay: star.delay,
+                    }}
+                  />
+                ))}
+              </span>
+              <span className="astral-ring astral-ring-outer" />
+              <span className="astral-ring astral-ring-inner" />
+              <span className="celestial-emblem">
+                <span className="emblem-halo" />
+                <span className="emblem-glyph">{card.glyph}</span>
+              </span>
+              <span className="realm-caption">{visual.realm}</span>
+            </span>
+            <span className="card-nameplate">
+              <span className="card-title">{card.name}</span>
+              <span className="card-title-en">{card.en}</span>
+            </span>
+          </span>
           <span className="card-orientation">{card.orientation}</span>
         </span>
       </span>

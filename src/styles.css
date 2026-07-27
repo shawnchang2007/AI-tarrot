@@ -454,109 +454,433 @@ fieldset {
   align-items: center;
   justify-content: center;
   backface-visibility: hidden;
-  border: 1px solid rgba(228, 201, 141, 0.48);
-  border-radius: 8px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--gold)) 62%, transparent);
+  border-radius: 12px;
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.42),
+    0 0 24px color-mix(in srgb, var(--card-glow, var(--violet)) 12%, transparent);
 }
 
 .card-back {
   flex-direction: column;
   background:
-    radial-gradient(circle at 50% 50%, rgba(129, 99, 180, 0.28), transparent 42%),
-    linear-gradient(145deg, #151535, #090b1d);
+    radial-gradient(circle at 50% 46%, rgba(160, 122, 205, 0.22), transparent 35%),
+    radial-gradient(circle at 18% 18%, rgba(228, 201, 141, 0.08), transparent 20%),
+    linear-gradient(155deg, #1a1a42 0%, #0d1029 54%, #080a1b 100%);
 }
 
 .card-back::before,
 .card-front::before {
   position: absolute;
   content: "";
-  inset: 8px;
-  border: 1px solid rgba(228, 201, 141, 0.2);
-  border-radius: 4px;
+  z-index: 5;
+  inset: 7px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--card-accent, var(--gold)) 30%, transparent);
+  border-radius: 7px;
 }
 
-.orbit {
+.card-back::after {
   position: absolute;
-  width: 66%;
+  content: "";
+  inset: 13px;
+  opacity: 0.52;
+  background-image:
+    radial-gradient(circle, rgba(255, 246, 220, 0.75) 0 1px, transparent 1.2px),
+    linear-gradient(45deg, transparent 49.6%, rgba(228, 201, 141, 0.07) 50%, transparent 50.4%);
+  background-position: 0 0, center;
+  background-size: 34px 39px, 100% 100%;
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 0 72%);
+}
+
+.back-star {
+  position: absolute;
+  z-index: 2;
+  color: rgba(242, 214, 155, 0.82);
+  font-size: 0.72rem;
+  text-shadow: 0 0 12px rgba(242, 214, 155, 0.8);
+}
+
+.back-star-one { top: 14%; right: 17%; }
+.back-star-two { top: 23%; left: 16%; font-size: 1.4rem; }
+.back-star-three { right: 23%; bottom: 28%; font-size: 0.58rem; }
+
+.back-orbit,
+.back-axis {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  pointer-events: none;
+}
+
+.back-orbit {
+  width: 68%;
   aspect-ratio: 1;
-  border: 1px solid rgba(228, 201, 141, 0.22);
+  border: 1px solid rgba(228, 201, 141, 0.2);
   border-radius: 50%;
 }
 
-.orbit-one { transform: rotateX(66deg); }
-.orbit-two { transform: rotateY(66deg); }
+.back-orbit-outer {
+  transform: rotateX(64deg) rotateZ(-8deg);
+}
 
-.moon-mark {
+.back-orbit-inner {
+  width: 46%;
+  border-style: dashed;
+  border-color: rgba(228, 201, 141, 0.26);
+  transform: rotateY(62deg) rotateZ(17deg);
+}
+
+.back-axis {
+  width: 61%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(228, 201, 141, 0.32), transparent);
+}
+
+.back-axis-vertical {
+  transform: rotate(90deg);
+}
+
+.eclipse-sigil {
   position: relative;
-  color: var(--gold);
+  z-index: 3;
+  width: clamp(70px, 9vw, 96px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(228, 201, 141, 0.3);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 8px rgba(228, 201, 141, 0.025),
+    0 0 50px rgba(151, 112, 197, 0.2);
+}
+
+.sigil-sun,
+.sigil-moon {
+  position: absolute;
+  top: 50%;
+  width: 48%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.sigil-sun {
+  left: 15%;
+  background: #e7cc91;
+  box-shadow: 0 0 22px rgba(231, 204, 145, 0.48);
+}
+
+.sigil-moon {
+  right: 15%;
+  border: 1px solid rgba(226, 218, 240, 0.68);
+  background: #11132e;
+  box-shadow: inset 8px -3px 10px rgba(122, 102, 167, 0.24);
+}
+
+.sigil-star {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  color: #fff5d8;
+  font-size: 0.62rem;
+  text-shadow: 0 0 10px #fff2bd;
+  transform: translate(-50%, -50%);
+}
+
+.back-motto {
+  position: absolute;
+  z-index: 3;
+  bottom: 52px;
+  color: rgba(228, 201, 141, 0.48);
   font-family: Georgia, serif;
-  font-size: clamp(2.9rem, 5vw, 4.4rem);
-  text-shadow: 0 0 24px rgba(228, 201, 141, 0.25);
+  font-size: clamp(0.42rem, 0.65vw, 0.52rem);
+  letter-spacing: 0.2em;
 }
 
 .back-brand {
   position: absolute;
-  bottom: 26px;
-  color: rgba(228, 201, 141, 0.65);
+  z-index: 3;
+  bottom: 28px;
+  color: rgba(242, 214, 155, 0.8);
   font-family: Georgia, serif;
   font-size: 0.55rem;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.42em;
 }
 
 .card-front {
   transform: rotateY(180deg);
   flex-direction: column;
   background:
-    radial-gradient(circle at 50% 38%, rgba(228, 201, 141, 0.13), transparent 42%),
-    linear-gradient(165deg, #17172f, #0b0d20);
+    radial-gradient(circle at 50% 32%, color-mix(in srgb, var(--card-glow) 27%, transparent), transparent 36%),
+    radial-gradient(circle at 22% 88%, color-mix(in srgb, var(--card-accent) 9%, transparent), transparent 27%),
+    linear-gradient(165deg, #181a3b 0%, #0d1028 52%, #090b1c 100%);
 }
 
-.card-front.is-reversed > *:not(.card-orientation, .card-number) {
+.card-front::after {
+  position: absolute;
+  content: "";
+  inset: 13px;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 11%, transparent);
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--card-accent) 9%, transparent), transparent 18%),
+    linear-gradient(315deg, color-mix(in srgb, var(--card-accent) 7%, transparent), transparent 16%);
+}
+
+.card-front-wands {
+  background:
+    radial-gradient(ellipse at 50% 38%, rgba(213, 104, 88, 0.25), transparent 36%),
+    linear-gradient(165deg, #291929, #131225 58%, #0a0c1b);
+}
+
+.card-front-cups {
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(84, 127, 196, 0.3), transparent 38%),
+    linear-gradient(165deg, #172641, #11152e 58%, #090b1d);
+}
+
+.card-front-swords {
+  background:
+    radial-gradient(ellipse at 50% 32%, rgba(119, 152, 219, 0.25), transparent 38%),
+    linear-gradient(165deg, #1b2340, #11152d 58%, #090b1c);
+}
+
+.card-front-pentacles {
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(113, 149, 109, 0.28), transparent 38%),
+    linear-gradient(165deg, #202b2c, #12172a 58%, #090b1b);
+}
+
+.card-art-rotatable {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 20px 18px;
+  transition: transform 650ms cubic-bezier(0.2, 0.75, 0.25, 1);
+}
+
+.card-front.is-reversed .card-art-rotatable {
   transform: rotate(180deg);
 }
 
-.card-number {
+.card-corner {
   position: absolute;
-  top: 18px;
-  left: 20px;
-  color: rgba(228, 201, 141, 0.55);
+  z-index: 6;
+  display: grid;
+  gap: 1px;
+  color: color-mix(in srgb, var(--card-accent) 78%, white 12%);
   font-family: Georgia, serif;
-  font-size: 0.68rem;
+  font-size: 0.58rem;
+  line-height: 1;
+  text-align: center;
 }
 
-.card-glyph {
-  color: var(--gold);
+.card-corner span {
+  font-size: 0.78rem;
+}
+
+.card-corner-top {
+  top: 18px;
+  left: 18px;
+}
+
+.card-corner-bottom {
+  right: 18px;
+  bottom: 18px;
+  transform: rotate(180deg);
+}
+
+.celestial-canvas {
+  position: relative;
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  place-items: center;
+}
+
+.card-nebula {
+  position: absolute;
+  width: 75%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 37% 38%, color-mix(in srgb, var(--card-accent) 22%, transparent), transparent 23%),
+    radial-gradient(circle at 62% 57%, color-mix(in srgb, var(--card-glow) 28%, transparent), transparent 31%);
+  filter: blur(11px);
+  opacity: 0.82;
+}
+
+.constellation-lines,
+.constellation-stars {
+  position: absolute;
+  inset: 5% 3% 12%;
+}
+
+.constellation-lines span {
+  position: absolute;
+  height: 1px;
+  opacity: 0.46;
+  background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
+  transform-origin: left center;
+}
+
+.constellation-stars span {
+  position: absolute;
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 85%, white 15%);
+  border-radius: 50%;
+  background: #fff8e7;
+  box-shadow:
+    0 0 7px var(--card-accent),
+    0 0 16px color-mix(in srgb, var(--card-glow) 55%, transparent);
+  animation: card-star-pulse 3.6s ease-in-out infinite;
+}
+
+@keyframes card-star-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+
+.astral-ring {
+  position: absolute;
+  display: block;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 34%, transparent);
+  border-radius: 50%;
+}
+
+.astral-ring-outer {
+  width: 69%;
+  aspect-ratio: 1;
+  border-style: dashed;
+  transform: rotate(14deg);
+}
+
+.astral-ring-outer::before,
+.astral-ring-outer::after {
+  position: absolute;
+  content: "";
+  width: 5px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--card-accent);
+  box-shadow: 0 0 10px var(--card-accent);
+}
+
+.astral-ring-outer::before {
+  top: 8%;
+  left: 19%;
+}
+
+.astral-ring-outer::after {
+  right: 8%;
+  bottom: 24%;
+}
+
+.astral-ring-inner {
+  width: 47%;
+  aspect-ratio: 1;
+  border-color: color-mix(in srgb, var(--card-accent) 26%, transparent);
+  transform: rotateX(66deg) rotateZ(-12deg);
+}
+
+.celestial-emblem {
+  position: relative;
+  display: grid;
+  width: 42%;
+  max-width: 74px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 42%, transparent);
+  border-radius: 50%;
+  background: rgba(8, 10, 27, 0.68);
+  box-shadow:
+    0 0 0 7px color-mix(in srgb, var(--card-glow) 6%, transparent),
+    0 0 35px color-mix(in srgb, var(--card-glow) 28%, transparent);
+}
+
+.emblem-halo {
+  position: absolute;
+  inset: -9px;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 16%, transparent);
+  border-radius: 50%;
+}
+
+.emblem-halo::before,
+.emblem-halo::after {
+  position: absolute;
+  content: "";
+  top: 50%;
+  left: 50%;
+  width: 128%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--card-accent) 44%, transparent), transparent);
+  transform: translate(-50%, -50%);
+}
+
+.emblem-halo::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.emblem-glyph {
+  position: relative;
+  z-index: 1;
+  color: var(--card-accent);
   font-family: Georgia, serif;
-  font-size: clamp(2.7rem, 5vw, 4.3rem);
+  font-size: clamp(1.8rem, 3.3vw, 2.8rem);
   line-height: 1;
-  transition: transform 600ms ease;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--card-glow) 78%, transparent);
+}
+
+.realm-caption {
+  position: absolute;
+  bottom: 5%;
+  color: color-mix(in srgb, var(--card-accent) 72%, white 10%);
+  font-family: Georgia, serif;
+  font-size: clamp(0.4rem, 0.65vw, 0.52rem);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.card-nameplate {
+  position: relative;
+  display: grid;
+  min-height: 59px;
+  padding-top: 11px;
+  place-items: start center;
+  border-top: 1px solid color-mix(in srgb, var(--card-accent) 19%, transparent);
+  text-align: center;
 }
 
 .card-title {
-  margin-top: 25px;
+  max-width: 95%;
   font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
-  transition: transform 600ms ease;
+  font-size: clamp(0.84rem, 1.35vw, 1.1rem);
+  line-height: 1.18;
 }
 
 .card-title-en {
-  margin-top: 8px;
-  color: #817d91;
+  margin-top: 5px;
+  color: color-mix(in srgb, var(--card-accent) 46%, #8d899d);
   font-family: Georgia, serif;
-  font-size: 0.57rem;
-  letter-spacing: 0.08em;
+  font-size: 0.47rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  transition: transform 600ms ease;
 }
 
 .card-orientation {
   position: absolute;
-  right: 14px;
-  bottom: 15px;
-  padding: 4px 7px;
-  color: var(--gold);
-  border: 1px solid rgba(228, 201, 141, 0.2);
-  font-size: 0.58rem;
+  z-index: 7;
+  top: 17px;
+  right: 15px;
+  padding: 4px 6px;
+  color: color-mix(in srgb, var(--card-accent) 78%, white 8%);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 22%, transparent);
+  border-radius: 999px;
+  background: rgba(6, 8, 22, 0.52);
+  font-size: 0.48rem;
+  letter-spacing: 0.04em;
 }
 
 .cards-5 .tarot-card {
