@@ -118,6 +118,70 @@ main {
   letter-spacing: 0.13em;
 }
 
+.nav-actions {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+}
+
+.language-switch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid rgba(228, 201, 141, 0.18);
+  border-radius: 999px;
+  background: rgba(13, 15, 35, 0.72);
+  box-shadow: inset 0 0 16px rgba(228, 201, 141, 0.03);
+}
+
+.language-switch button {
+  cursor: pointer;
+  min-width: 42px;
+  padding: 6px 9px;
+  color: #77748a;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-family: Georgia, "Noto Serif SC", "Songti SC", serif;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  transition: 180ms ease;
+}
+
+.language-switch button:hover {
+  color: var(--ink);
+}
+
+.language-switch button.is-active {
+  color: #171628;
+  background: linear-gradient(135deg, #f0dba8, #c7a966);
+  box-shadow: 0 3px 12px rgba(228, 201, 141, 0.16);
+}
+
+.language-zh .nav-whisper,
+.language-zh .eyebrow,
+.language-zh .section-kicker {
+  letter-spacing: 0.14em;
+  text-transform: none;
+}
+
+.language-zh .hero h1 {
+  max-width: 960px;
+  letter-spacing: 0.025em;
+  line-height: 1.34;
+}
+
+.language-zh .hero h1 em {
+  font-style: normal;
+}
+
+.language-zh .hero-copy {
+  line-height: 2.15;
+}
+
+.language-zh .card-title {
+  letter-spacing: 0.06em;
+}
+
 .hero {
   display: grid;
   place-items: center;
@@ -1103,6 +1167,15 @@ footer small {
 
   .nav-whisper {
     display: none;
+  }
+
+  .nav-actions {
+    gap: 10px;
+  }
+
+  .language-switch button {
+    min-width: 39px;
+    padding: 6px 7px;
   }
 
   .hero {
