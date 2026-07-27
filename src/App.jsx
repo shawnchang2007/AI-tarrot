@@ -204,9 +204,14 @@ function TarotCard({ card, index, onReveal }) {
               </span>
               <span className="astral-ring astral-ring-outer" />
               <span className="astral-ring astral-ring-inner" />
-              <span className="celestial-emblem">
-                <span className="emblem-halo" />
-                <span className="emblem-glyph">{card.glyph}</span>
+              <span className="card-illustration">
+                <img
+                  src={`/card-art/${card.id}.jpg`}
+                  alt=""
+                  draggable="false"
+                  decoding="async"
+                />
+                <span className="illustration-vignette" />
               </span>
               <span className="realm-caption">{visual.realm}</span>
             </span>
@@ -416,6 +421,10 @@ export default function App() {
                 </label>
               ))}
             </div>
+            <p className="deck-note">
+              <span aria-hidden="true">✦</span>
+              Drawing from the complete 78-card Soluna deck, with original artwork for every card.
+            </p>
           </fieldset>
 
           {error && cards.length === 0 && <p className="form-error" role="alert">{error}</p>}
