@@ -16,32 +16,47 @@ function createFallbackReading(question, cards) {
   const sharedKeywordsZh = [...new Set(cards.flatMap((card) => card.keywordsZh || []))].slice(0, 4);
   const primaryKeyword = sharedKeywords[0] || "gentle resolve";
   const primaryKeywordZh = sharedKeywordsZh[0] || "温柔的坚定";
-  const cardConnectionsEn = cards
-    .map((card) => {
-      const keyword = card.keywords?.[0] || "awareness";
-      const orientation =
-        card.orientation === "Reversed"
-          ? `Reversed, it does not signal failure; it suggests that ${keyword} is developing inwardly and can be strengthened with patient attention.`
-          : `Upright, it shows that ${keyword} is a resource you can actively use now.`;
-      return `${card.name} in “${card.position}” speaks directly to this question: ${orientation}`;
-    })
-    .join(" ");
-  const cardConnectionsZh = cards
-    .map((card) => {
-      const keyword = card.keywordsZh?.[0] || "觉察";
-      const orientation =
-        card.orientation === "Reversed"
-          ? `逆位并不代表失败，而是提醒你：${keyword}正在内在形成，可以通过耐心关注逐渐增强。`
-          : `正位说明，${keyword}正是你此刻可以主动调用的力量。`;
-      return `${card.nameZh}落在“${card.positionZh}”：针对这个问题，${orientation}`;
-    })
-    .join("");
+  const cardInsightsEn = cards.map((card) => {
+    const keywords = card.keywords?.length
+      ? card.keywords
+      : ["awareness", "choice", "steady growth"];
+    const keywordList = keywords.join(", ");
+    const orientationMeaning =
+      card.orientation === "Reversed"
+        ? `In its reversed direction, these qualities may be quieter, delayed, overextended, or asking to be rebuilt from within. This is not a negative verdict; it is an invitation to notice where the energy needs patience, balance, or a more personal expression.`
+        : `Upright, these qualities are available more openly. The card invites you to recognize them as active resources rather than waiting for outside certainty.`;
+
+    return {
+      card: card.name,
+      meaning: `${card.name} carries the core themes of ${keywordList}. ${orientationMeaning}`,
+      connection: `In the spread position “${card.position},” this card speaks to “${question}” by highlighting ${keywords[0]} as a practical part of the answer. It suggests looking for one place where you can express this quality now, then using what you learn to make the next decision with more clarity and self-trust.`,
+      guidance: `Work with ${keywords[0]} through one small, observable choice instead of demanding a perfect answer all at once.`,
+    };
+  });
+  const cardInsightsZh = cards.map((card) => {
+    const keywords = card.keywordsZh?.length
+      ? card.keywordsZh
+      : ["觉察", "选择", "稳步成长"];
+    const keywordList = keywords.join("、");
+    const orientationMeaning =
+      card.orientation === "Reversed"
+        ? `逆位表示这些力量可能暂时更内敛、受阻、失衡，或需要从内在重新建立。它不是负面的判决，而是在提醒你：这股能量需要更多耐心、界限或更适合自己的表达方式。`
+        : `正位表示这些力量正较为清晰地向你开放，可以把它们视为此刻能够主动使用的资源，而不必等待外界先给出确定答案。`;
+
+    return {
+      card: card.nameZh,
+      meaning: `${card.nameZh}的核心象征包含${keywordList}。${orientationMeaning}`,
+      connection: `它落在“${card.positionZh}”这个位置，回应“${question}”时，重点是把${keywords[0]}看成答案中可以实际运用的一部分。你可以先找出一个当下能够表达这股力量的地方，再用得到的真实反馈，帮助自己更清晰、更相信自己地作出下一步选择。`,
+      guidance: `把${keywords[0]}落实成一个看得见的小选择，不必要求自己一次就得到完美答案。`,
+    };
+  });
 
   return {
     en: {
       summary: `For “${question},” the constructive way forward begins with ${primaryKeyword}.`,
-      connections: `In direct response to “${question},” ${cardConnectionsEn} Together, the spread points toward possibility rather than a fixed outcome: the useful message is to recognize what is already within your influence and build from there.`,
-      encouragement: `This question does not place you at a dead end. It shows that you care enough to look for a wiser response. You do not need perfect certainty before moving forward; your willingness to notice ${primaryKeyword} gives you a practical starting point, and small evidence of progress can help confidence grow.`,
+      cardInsights: cardInsightsEn,
+      connections: `Read together, the spread answers “${question}” as a progression rather than a fixed prediction. The first card names what deserves your attention, the middle of the spread shows the inner resource or adjustment that can help, and the final position turns that understanding toward movement. The repeated themes of ${sharedKeywords.join(", ") || primaryKeyword} suggest that your most useful path is to work with what is already within your influence, gather real feedback, and let clarity grow through action rather than pressure.`,
+      encouragement: `This question does not place you at a dead end. Your willingness to examine it already shows care, discernment, and the capacity to respond differently. The cards do not require perfect certainty from you. They point to ${primaryKeyword} as a starting resource: use it in a modest, observable way, notice what changes, and allow that evidence to strengthen your confidence step by step.`,
       actions: [
         `Write one sentence beginning with “What I can influence in this question is…” and name one real choice.`,
         `Turn ${primaryKeyword} into one small action you can complete within the next 24 hours.`,
@@ -51,8 +66,9 @@ function createFallbackReading(question, cards) {
     },
     zh: {
       summary: `面对“${question}”，这些牌把积极的突破口指向${primaryKeywordZh}。`,
-      connections: `紧扣“${question}”来看，${cardConnectionsZh}整组牌并没有把你推向一个固定结局，而是把注意力带回仍在你掌握之中的选择：先看见可以调用的力量，再从那里建立新的可能。`,
-      encouragement: `这个问题并不是一条死路。你愿意认真面对它，本身就说明你拥有改变回应方式的能力。你不需要等到完全确定才开始行动；从${primaryKeywordZh}出发，哪怕只是获得一点真实的进展，也会帮助你重新建立信心。`,
+      cardInsights: cardInsightsZh,
+      connections: `把这些牌放在一起看，它们并不是在为“${question}”宣布一个固定结局，而是在呈现一条可以逐步理解和行动的路径。前面的牌指出最值得正视的部分，中间的牌提醒你已经拥有的资源或需要调整的方式，最后的位置则把理解带向行动。${sharedKeywordsZh.join("、") || primaryKeywordZh}这些反复出现的主题说明，答案不必来自一次性的确定，而可以从你仍然能够影响的地方开始，在真实反馈中逐渐变得清晰。`,
+      encouragement: `这个问题并不是一条死路。你愿意认真面对它，本身就说明你拥有觉察、判断和改变回应方式的能力。牌面没有要求你先获得百分之百的确定，而是把${primaryKeywordZh}放在你面前，作为一个可以立即使用的起点。先把它落实在一个小而真实的选择里，再让得到的证据一步步帮助你建立信心。`,
       actions: [
         "写下一句“在这个问题里，我仍然能够影响的是……”，并填入一个真实选择。",
         `把${primaryKeywordZh}变成一件能在未来 24 小时内完成的小行动。`,
@@ -93,7 +109,11 @@ CONSTRUCTIVE INTERPRETATION:
 
 CONTENT STANDARD:
 - The summary must directly answer the question with one clear, hopeful core message.
-- The connections section must synthesize the cards into a question-specific answer, not list isolated textbook meanings.
+- Include a cardInsights array with exactly one item for every drawn card, in the same order as the spread.
+- For every card, first explain its core symbolic meaning and how upright or reversed changes that meaning. This must teach the user what the card means without becoming a generic tarot lecture.
+- Then explain how that exact card, orientation, and spread position speaks to the user's exact question. Give each card a distinct role; do not repeat the same interpretation across cards.
+- End each card insight with one concise, constructive way the user can work with that card's energy.
+- The connections section must then synthesize the whole spread into a detailed, question-specific answer rather than repeating the individual explanations.
 - The encouragement must name a real strength, resource, opportunity, or choice visible in this particular spread.
 - Each action must begin with a clear verb, be achievable within 24 hours or this week, and directly help with the user's question.
 - The reflection question must open a constructive next step and keep the user's agency central.
@@ -102,27 +122,59 @@ CONTENT STANDARD:
 Return the same reading in natural English and natural Simplified Chinese. The two versions must carry the same meaning and specificity. Return only a JSON object without a Markdown code fence:
 {
   "en": {
-    "summary": "one direct, hopeful answer to the exact question in 18 words or fewer",
-    "connections": "a tightly question-specific synthesis of every card and spread position, 110-180 words",
-    "encouragement": "grounded positive guidance naming the user's real strength or opportunity, 60-100 words",
+    "summary": "one direct, hopeful answer to the exact question in 25 words or fewer",
+    "cardInsights": [
+      {
+        "card": "the exact English card name",
+        "meaning": "45-75 words explaining the card's core symbolism and the effect of its orientation",
+        "connection": "55-90 words explaining this card's distinct role in the spread and how it directly answers the exact question",
+        "guidance": "one concise constructive sentence for working with this card"
+      }
+    ],
+    "connections": "a detailed, tightly question-specific synthesis of how the full spread works together, 140-220 words",
+    "encouragement": "grounded positive guidance naming the user's real strength or opportunity, 80-130 words",
     "actions": ["question-specific action beginning with a verb", "question-specific action beginning with a verb", "question-specific action beginning with a verb"],
     "reflection": "one constructive question that increases agency"
   },
   "zh": {
     "summary": "一句直接回答用户原问题、积极而不空泛的核心信息",
-    "connections": "紧扣原问题，综合说明每张牌、牌位和正逆位如何共同给出正向答案",
-    "encouragement": "指出这副牌中与原问题直接相关的真实力量、资源、机会或选择",
+    "cardInsights": [
+      {
+        "card": "对应的中文牌名",
+        "meaning": "具体解释这张牌的核心象征，以及正位或逆位如何改变表达，约80至130个汉字",
+        "connection": "说明它所在的牌位如何独立而具体地回应用户原问题，约90至150个汉字",
+        "guidance": "一句简洁、积极而现实的运用建议"
+      }
+    ],
+    "connections": "紧扣原问题，详细综合所有牌、牌位和正逆方向如何共同构成答案，约220至360个汉字",
+    "encouragement": "指出这副牌中与原问题直接相关的真实力量、资源、机会或选择，约130至220个汉字",
     "actions": ["以动词开头、直接帮助原问题的具体行动", "以动词开头、直接帮助原问题的具体行动", "以动词开头、直接帮助原问题的具体行动"],
     "reflection": "一个能够增加主动性并打开积极下一步的问题"
   }
 }`;
 }
 
-function normalizeReading(reading) {
+function normalizeCardInsight(insight) {
+  if (!insight || typeof insight !== "object") return null;
+  if (!insight.meaning || !insight.connection) return null;
+  return {
+    card: String(insight.card || ""),
+    meaning: String(insight.meaning),
+    connection: String(insight.connection),
+    guidance: String(insight.guidance || ""),
+  };
+}
+
+function normalizeReading(reading, expectedCardCount) {
   if (!reading || typeof reading !== "object") return null;
   if (!reading.summary || !reading.encouragement) return null;
+  const cardInsights = Array.isArray(reading.cardInsights)
+    ? reading.cardInsights.map(normalizeCardInsight).filter(Boolean)
+    : [];
+  if (cardInsights.length !== expectedCardCount) return null;
   return {
     summary: String(reading.summary),
+    cardInsights,
     connections: String(reading.connections || ""),
     encouragement: String(reading.encouragement),
     actions: Array.isArray(reading.actions)
@@ -132,7 +184,7 @@ function normalizeReading(reading) {
   };
 }
 
-function parseModelReading(result) {
+function parseModelReading(result, expectedCardCount) {
   const content =
     result?.response ||
     result?.choices?.[0]?.message?.content ||
@@ -157,8 +209,8 @@ function parseModelReading(result) {
     }
 
     if (!parsed || typeof parsed !== "object") return null;
-    const en = normalizeReading(parsed.en);
-    const zh = normalizeReading(parsed.zh);
+    const en = normalizeReading(parsed.en, expectedCardCount);
+    const zh = normalizeReading(parsed.zh, expectedCardCount);
     return en && zh ? { en, zh } : null;
   } catch {
     return null;
@@ -180,8 +232,8 @@ async function requestDeepSeek(env, systemPrompt, userPrompt) {
       ],
       response_format: { type: "json_object" },
       thinking: { type: "disabled" },
-      temperature: 0.55,
-      max_tokens: 1500,
+      temperature: 0.48,
+      max_tokens: 4000,
     }),
   });
 
@@ -258,7 +310,7 @@ Before returning the JSON, verify silently that every section directly helps ans
   if (context.env?.DEEPSEEK_API_KEY) {
     try {
       const result = await requestDeepSeek(context.env, systemPrompt, userPrompt);
-      const reading = parseModelReading(result);
+      const reading = parseModelReading(result, safeCards.length);
       if (reading) {
         return response({ reading, source: "deepseek" });
       }
@@ -283,6 +335,21 @@ Before returning the JSON, verify silently that every section directly helps ans
                 type: "object",
                 properties: {
                   summary: { type: "string" },
+                  cardInsights: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        card: { type: "string" },
+                        meaning: { type: "string" },
+                        connection: { type: "string" },
+                        guidance: { type: "string" },
+                      },
+                      required: ["card", "meaning", "connection", "guidance"],
+                    },
+                    minItems: safeCards.length,
+                    maxItems: safeCards.length,
+                  },
                   connections: { type: "string" },
                   encouragement: { type: "string" },
                   actions: {
@@ -293,12 +360,27 @@ Before returning the JSON, verify silently that every section directly helps ans
                   },
                   reflection: { type: "string" },
                 },
-                required: ["summary", "connections", "encouragement", "actions", "reflection"],
+                required: ["summary", "cardInsights", "connections", "encouragement", "actions", "reflection"],
               },
               zh: {
                 type: "object",
                 properties: {
                   summary: { type: "string" },
+                  cardInsights: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        card: { type: "string" },
+                        meaning: { type: "string" },
+                        connection: { type: "string" },
+                        guidance: { type: "string" },
+                      },
+                      required: ["card", "meaning", "connection", "guidance"],
+                    },
+                    minItems: safeCards.length,
+                    maxItems: safeCards.length,
+                  },
                   connections: { type: "string" },
                   encouragement: { type: "string" },
                   actions: {
@@ -309,17 +391,17 @@ Before returning the JSON, verify silently that every section directly helps ans
                   },
                   reflection: { type: "string" },
                 },
-                required: ["summary", "connections", "encouragement", "actions", "reflection"],
+                required: ["summary", "cardInsights", "connections", "encouragement", "actions", "reflection"],
               },
             },
             required: ["en", "zh"],
           },
         },
-        temperature: 0.55,
-        max_tokens: 1500,
+        temperature: 0.48,
+        max_tokens: 4000,
       });
 
-      const reading = parseModelReading(result);
+      const reading = parseModelReading(result, safeCards.length);
       if (reading) {
         return response({ reading, source: "workers-ai" });
       }
