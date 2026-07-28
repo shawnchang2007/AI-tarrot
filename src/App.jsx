@@ -100,6 +100,12 @@ const translations = {
     backMotto: "AS ABOVE · SO WITHIN",
     readingKicker: "A message from your inner sky",
     readingFallback: "You already carry the strength to move forward",
+    cardByCardKicker: "The cards · One by one",
+    cardByCardTitle: "What each card is showing you",
+    cardByCardCopy: "First, understand the card itself. Then see how its position and orientation speak directly to your question.",
+    cardMeaning: "The card’s meaning",
+    cardConnection: "How it meets your question",
+    cardGuidance: "A constructive way to work with it",
     connections: "How the cards connect",
     encouragement: "A little encouragement",
     actions: "Small steps you can try",
@@ -207,6 +213,12 @@ const translations = {
     backMotto: "如其在上 · 如其在心",
     readingKicker: "来自你内心星空的一封信",
     readingFallback: "你已经拥有继续前行的力量",
+    cardByCardKicker: "逐张读牌 · 看见细节",
+    cardByCardTitle: "每一张牌正在告诉你什么",
+    cardByCardCopy: "先理解牌本身的象征，再看它所在的牌位与正逆方向，如何回应你的具体问题。",
+    cardMeaning: "这张牌的含义",
+    cardConnection: "它与你的问题如何关联",
+    cardGuidance: "可以如何积极运用",
     connections: "这些牌如何彼此连接",
     encouragement: "给你的一点鼓励",
     actions: "你可以尝试的小步骤",
@@ -697,8 +709,25 @@ function GuardianStage({ guardian, t }) {
         <span className="guardian-path guardian-path-one" aria-hidden="true" />
         <span className="guardian-path guardian-path-two" aria-hidden="true" />
         <span className="guardian-traveler" aria-hidden="true">
+          <span className="guardian-trail guardian-trail-glow" />
+          <span className="guardian-trail guardian-trail-core" />
           <span className="guardian-stardust" />
-          <img className="guardian-spirit" src={visual.image} alt="" />
+          <span className="guardian-particles">
+            {Array.from({ length: 14 }, (_, index) => (
+              <i
+                key={index}
+                style={{
+                  "--particle-delay": `${(index % 7) * -0.16}s`,
+                  "--particle-y": `${12 + ((index * 23) % 76)}%`,
+                  "--particle-size": `${2 + (index % 4)}px`,
+                  "--particle-distance": `${80 + ((index * 19) % 150)}px`,
+                }}
+              />
+            ))}
+          </span>
+          <span className="guardian-sprite-frame">
+            <img className="guardian-spirit" src={visual.image} alt="" />
+          </span>
         </span>
       </div>
 
@@ -710,7 +739,7 @@ function GuardianStage({ guardian, t }) {
   );
 }
 
-function Reading({ language, reading, t }) {
+function Reading({ cards, language, reading, t }) {
   if (!reading) return null;
   const localizedReading = reading[language] || reading;
 
@@ -718,6 +747,60 @@ function Reading({ language, reading, t }) {
     <section className="reading-panel" aria-live="polite">
       <div className="section-kicker">{t.readingKicker}</div>
       <h2>{localizedReading.summary || t.readingFallback}</h2>
+
+      {localizedReading.cardInsights?.length > 0 && (
+        <section className="card-insights-section">
+          <div className="card-insights-heading">
+            <span className="section-kicker">{t.cardByCardKicker}</span>
+            <h3>{t.cardByCardTitle}</h3>
+            <p>{t.cardByCardCopy}</p>
+          </div>
+
+          <div className="card-insights-list">
+            {localizedReading.cardInsights.map((insight, index) => {
+              const drawnCard = cards[index];
+              const cardName =
+                (language === "zh" ? drawnCard?.nameZh : drawnCard?.name) ||
+                insight.card;
+              const cardPosition =
+                spreadPositions[language]?.[cards.length]?.[index] ||
+                drawnCard?.position ||
+                "";
+              const orientation =
+                drawnCard?.orientation === "Reversed" ? t.reversed : t.upright;
+
+              return (
+                <article className="card-insight" key={`${cardName}-${index}`}>
+                  <div className="card-insight-identity">
+                    <span className="card-insight-number">0{index + 1}</span>
+                    <div>
+                      <h4>{cardName}</h4>
+                      <p>{cardPosition} · {orientation}</p>
+                    </div>
+                  </div>
+                  <div className="card-insight-detail">
+                    <div>
+                      <span>{t.cardMeaning}</span>
+                      <p>{insight.meaning}</p>
+                    </div>
+                    <div>
+                      <span>{t.cardConnection}</span>
+                      <p>{insight.connection}</p>
+                    </div>
+                    {insight.guidance && (
+                      <blockquote className="card-insight-guidance">
+                        <span>{t.cardGuidance}</span>
+                        {insight.guidance}
+                      </blockquote>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       <div className="reading-grid">
         <article>
           <span className="reading-icon">☾</span>
@@ -1097,7 +1180,7 @@ export default function App() {
                 </p>
               )}
 
-              <Reading language={language} reading={reading} t={t} />
+              <Reading cards={cards} language={language} reading={reading} t={t} />
 
               {reading && (
                 <div className="restart-wrap">
