@@ -29,6 +29,36 @@ const translations = {
       { value: 5, label: "Five cards", hint: "A deeper exploration" },
     ],
     deckNote: "Drawing from the complete 78-card Soluna deck, with original artwork for every card.",
+    chooseGuardian: "Choose a guardian spirit",
+    guardianPickerCopy: "Invite one celestial companion to cross the veil with you after the cards are drawn.",
+    guardianPickerNote: "Your guardian shapes the atmosphere of the ritual, not the cards you receive.",
+    guardianSelected: "Chosen",
+    guardianOptions: [
+      {
+        id: "deer",
+        name: "Moon Stag",
+        traits: "Intuition · Gentleness",
+        copy: "A quiet guide for listening inward and moving with care.",
+        arrivalTitle: "The Moon Stag crosses your path",
+        blessing: "Move gently. Your intuition already knows the shape of the path.",
+      },
+      {
+        id: "eagle",
+        name: "Star Eagle",
+        traits: "Clarity · Courage",
+        copy: "A skyward guide for seeing beyond noise and hesitation.",
+        arrivalTitle: "The Star Eagle parts the veil",
+        blessing: "Rise above the noise. A clearer view is already returning.",
+      },
+      {
+        id: "wolf",
+        name: "Twilight Wolf",
+        traits: "Instinct · Steadiness",
+        copy: "A loyal guide for trusting your pace and inner strength.",
+        arrivalTitle: "The Twilight Wolf runs beside you",
+        blessing: "Trust your pace. Your inner strength is keeping step with you.",
+      },
+    ],
     questionTooShort: "Share a little more so Soluna can better understand what is on your mind.",
     shuffle: "Enter the ritual",
     exitRitual: "Leave the ritual",
@@ -52,6 +82,8 @@ const translations = {
     shuffleKicker: "The threshold · 03",
     shuffleTitle: "The deck is listening",
     shuffleCopy: "Keep your question softly in mind while the cards find their place.",
+    guardianKicker: "The draw · A guardian answers",
+    guardianArrivalCopy: "The cards have found their place. Your chosen spirit carries a quiet blessing across the threshold.",
     revealKicker: "03 · Reveal the constellation",
     revealedTitle: "Your cards are revealed",
     revealTitle: "Turn each card when it feels right",
@@ -104,6 +136,36 @@ const translations = {
       { value: 5, label: "五张牌", hint: "进行一次深入探索" },
     ],
     deckNote: "从完整的 78 张 Soluna 塔罗牌中抽取，每张牌都拥有独立原创画面。",
+    chooseGuardian: "选择一位守护灵",
+    guardianPickerCopy: "邀请一位星空伙伴，在牌面落定后陪你穿过仪式的边界。",
+    guardianPickerNote: "守护灵会改变仪式的氛围，但不会影响你抽到的牌。",
+    guardianSelected: "已选择",
+    guardianOptions: [
+      {
+        id: "deer",
+        name: "月鹿",
+        traits: "直觉 · 温柔",
+        copy: "陪你向内聆听，以温柔而清醒的步伐前行。",
+        arrivalTitle: "月鹿穿过星光，来到你的路上",
+        blessing: "温柔地前行吧，你的直觉已经看见了道路的轮廓。",
+      },
+      {
+        id: "eagle",
+        name: "星鹰",
+        traits: "清晰 · 勇气",
+        copy: "陪你越过纷扰，从更高处看见真正重要的方向。",
+        arrivalTitle: "星鹰掠过长夜，为你拨开帷幕",
+        blessing: "越过眼前的杂音吧，更清晰的视野正在回到你身边。",
+      },
+      {
+        id: "wolf",
+        name: "暮狼",
+        traits: "本能 · 坚定",
+        copy: "陪你相信自己的节奏，也相信内心安静的力量。",
+        arrivalTitle: "暮狼踏过星雾，与你并肩前行",
+        blessing: "相信自己的步伐，你内心的力量一直与你同行。",
+      },
+    ],
     questionTooShort: "请再多写一点，让 Soluna 更好地理解你此刻的想法。",
     shuffle: "进入占卜仪式",
     exitRitual: "离开仪式",
@@ -127,6 +189,8 @@ const translations = {
     shuffleKicker: "进入仪式 · 03",
     shuffleTitle: "让牌组聆听你的问题",
     shuffleCopy: "在心里轻轻想着它，让属于你的牌慢慢找到位置。",
+    guardianKicker: "抽牌 · 守护灵回应",
+    guardianArrivalCopy: "牌已经找到了属于自己的位置，你选择的守护灵正带着一句安静的祝福穿过边界。",
     revealKicker: "03 · 揭开星图",
     revealedTitle: "你的牌已经全部揭晓",
     revealTitle: "在感觉合适的时候，翻开每张牌",
@@ -153,6 +217,23 @@ const translations = {
     footerNote: "仅供自我观照与娱乐，不可替代专业建议。",
   },
 };
+
+const guardianSpirits = {
+  deer: {
+    image: "/guardian-spirits/moon-stag.webp",
+    motion: "ground",
+  },
+  eagle: {
+    image: "/guardian-spirits/star-eagle.webp",
+    motion: "sky",
+  },
+  wolf: {
+    image: "/guardian-spirits/twilight-wolf.webp",
+    motion: "ground",
+  },
+};
+
+const guardianIds = Object.keys(guardianSpirits);
 
 function StarField() {
   const stars = useMemo(
@@ -591,6 +672,44 @@ function ShuffleStage({ question, t }) {
   );
 }
 
+function GuardianStage({ guardian, t }) {
+  const spirit =
+    t.guardianOptions.find((option) => option.id === guardian) ||
+    t.guardianOptions[0];
+  const visual = guardianSpirits[spirit.id] || guardianSpirits.deer;
+
+  return (
+    <section
+      className={`ritual-stage guardian-stage guardian-${spirit.id}`}
+      aria-live="polite"
+    >
+      <div className="ritual-stage-copy guardian-stage-copy">
+        <span className="section-kicker">{t.guardianKicker}</span>
+        <h1>{spirit.arrivalTitle}</h1>
+        <p>{t.guardianArrivalCopy}</p>
+      </div>
+
+      <div
+        className={`guardian-crossing guardian-motion-${visual.motion}`}
+        role="img"
+        aria-label={spirit.name}
+      >
+        <span className="guardian-path guardian-path-one" aria-hidden="true" />
+        <span className="guardian-path guardian-path-two" aria-hidden="true" />
+        <span className="guardian-traveler" aria-hidden="true">
+          <span className="guardian-stardust" />
+          <img className="guardian-spirit" src={visual.image} alt="" />
+        </span>
+      </div>
+
+      <div className="guardian-blessing">
+        <span>{spirit.name} · {spirit.traits}</span>
+        <p>“{spirit.blessing}”</p>
+      </div>
+    </section>
+  );
+}
+
 function Reading({ language, reading, t }) {
   if (!reading) return null;
   const localizedReading = reading[language] || reading;
@@ -643,6 +762,7 @@ function readStoredRitual() {
       return {
         question: stored.question,
         count: Number(stored.count),
+        guardian: guardianIds.includes(stored.guardian) ? stored.guardian : "deer",
       };
     }
   } catch {
@@ -668,6 +788,11 @@ export default function App() {
   const [breathCount, setBreathCount] = useState(3);
   const [question, setQuestion] = useState(initialRitual?.question || "");
   const [count, setCount] = useState(initialRitual?.count || 3);
+  const [guardian, setGuardian] = useState(() => {
+    if (initialRitual?.guardian) return initialRitual.guardian;
+    const savedGuardian = window.localStorage.getItem("soluna-guardian");
+    return guardianIds.includes(savedGuardian) ? savedGuardian : "deer";
+  });
   const [cards, setCards] = useState([]);
   const [reading, setReading] = useState(null);
   const [status, setStatus] = useState("idle");
@@ -696,6 +821,7 @@ export default function App() {
       if (window.location.pathname === "/reading" && storedRitual?.question) {
         setQuestion(storedRitual.question);
         setCount(storedRitual.count);
+        setGuardian(storedRitual.guardian);
         setView("ritual");
         setRitualStage("candle");
         setCandleLit(false);
@@ -733,12 +859,23 @@ export default function App() {
     const timer = window.setTimeout(() => {
       setCards(drawCards(count, language));
       setStatus("drawn");
-      setRitualStage("cards");
+      setRitualStage("guardian");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }, 2600);
 
     return () => window.clearTimeout(timer);
   }, [count, language, ritualStage]);
+
+  useEffect(() => {
+    if (ritualStage !== "guardian") return undefined;
+
+    const timer = window.setTimeout(() => {
+      setRitualStage("cards");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 3900);
+
+    return () => window.clearTimeout(timer);
+  }, [ritualStage]);
 
   function changeLanguage(nextLanguage) {
     if (nextLanguage === language) return;
@@ -773,11 +910,17 @@ export default function App() {
     setBreathCount(3);
     window.sessionStorage.setItem(
       "soluna-ritual",
-      JSON.stringify({ question: cleanQuestion, count }),
+      JSON.stringify({ question: cleanQuestion, count, guardian }),
     );
     window.history.pushState({}, "", "/reading");
     setView("ritual");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function chooseGuardian(nextGuardian) {
+    if (!guardianIds.includes(nextGuardian)) return;
+    setGuardian(nextGuardian);
+    window.localStorage.setItem("soluna-guardian", nextGuardian);
   }
 
   function revealCard(index) {
@@ -903,6 +1046,10 @@ export default function App() {
           )}
 
           {ritualStage === "shuffle" && <ShuffleStage question={question} t={t} />}
+
+          {ritualStage === "guardian" && (
+            <GuardianStage guardian={guardian} t={t} />
+          )}
 
           {ritualStage === "cards" && (
             <section className="ritual-card-stage" id="card-table">
@@ -1035,6 +1182,47 @@ export default function App() {
             <p className="deck-note">
               <span aria-hidden="true">✦</span>
               {t.deckNote}
+            </p>
+          </fieldset>
+
+          <fieldset className="guardian-fieldset">
+            <legend>{t.chooseGuardian}</legend>
+            <p className="guardian-picker-copy">{t.guardianPickerCopy}</p>
+            <div className="guardian-options">
+              {t.guardianOptions.map((option) => {
+                const visual = guardianSpirits[option.id];
+                const selected = guardian === option.id;
+
+                return (
+                  <label
+                    key={option.id}
+                    className={`guardian-option ${selected ? "is-selected" : ""}`}
+                  >
+                    <input
+                      type="radio"
+                      name="guardian"
+                      value={option.id}
+                      checked={selected}
+                      onChange={() => chooseGuardian(option.id)}
+                    />
+                    <span className="guardian-portrait" aria-hidden="true">
+                      <img src={visual.image} alt="" />
+                    </span>
+                    <span className="guardian-option-copy">
+                      <strong>{option.name}</strong>
+                      <small>{option.traits}</small>
+                      <span>{option.copy}</span>
+                    </span>
+                    <span className="guardian-choice-mark" aria-hidden="true">
+                      {selected ? "✦" : "○"}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+            <p className="guardian-picker-note">
+              <span aria-hidden="true">☾</span>
+              {t.guardianPickerNote}
             </p>
           </fieldset>
 
