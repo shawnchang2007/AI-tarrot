@@ -12,33 +12,53 @@ function response(body, status = 200) {
 }
 
 function createFallbackReading(question, cards) {
-  const first = cards[0];
-  const last = cards[cards.length - 1];
   const sharedKeywords = [...new Set(cards.flatMap((card) => card.keywords || []))].slice(0, 4);
   const sharedKeywordsZh = [...new Set(cards.flatMap((card) => card.keywordsZh || []))].slice(0, 4);
+  const primaryKeyword = sharedKeywords[0] || "gentle resolve";
+  const primaryKeywordZh = sharedKeywordsZh[0] || "温柔的坚定";
+  const cardConnectionsEn = cards
+    .map((card) => {
+      const keyword = card.keywords?.[0] || "awareness";
+      const orientation =
+        card.orientation === "Reversed"
+          ? `Reversed, it does not signal failure; it suggests that ${keyword} is developing inwardly and can be strengthened with patient attention.`
+          : `Upright, it shows that ${keyword} is a resource you can actively use now.`;
+      return `${card.name} in “${card.position}” speaks directly to this question: ${orientation}`;
+    })
+    .join(" ");
+  const cardConnectionsZh = cards
+    .map((card) => {
+      const keyword = card.keywordsZh?.[0] || "觉察";
+      const orientation =
+        card.orientation === "Reversed"
+          ? `逆位并不代表失败，而是提醒你：${keyword}正在内在形成，可以通过耐心关注逐渐增强。`
+          : `正位说明，${keyword}正是你此刻可以主动调用的力量。`;
+      return `${card.nameZh}落在“${card.positionZh}”：针对这个问题，${orientation}`;
+    })
+    .join("");
 
   return {
     en: {
-      summary: `These cards invite you to find your rhythm between ${sharedKeywords.slice(0, 2).join(" and ") || "awareness and action"}.`,
-      connections: `${first.name} ${first.orientation.toLowerCase()} in “${first.position}” asks you to notice what needs care right now. ${last.name} ${last.orientation.toLowerCase()} in “${last.position}” gently turns your attention toward what you can choose. Upright and reversed are not good or bad—only different angles of reflection.`,
-      encouragement: `You do not have to resolve every uncertainty inside “${question}” at once. The fact that you paused to ask means you are taking your feelings seriously, and that is already a meaningful first step.`,
+      summary: `For “${question},” the constructive way forward begins with ${primaryKeyword}.`,
+      connections: `In direct response to “${question},” ${cardConnectionsEn} Together, the spread points toward possibility rather than a fixed outcome: the useful message is to recognize what is already within your influence and build from there.`,
+      encouragement: `This question does not place you at a dead end. It shows that you care enough to look for a wiser response. You do not need perfect certainty before moving forward; your willingness to notice ${primaryKeyword} gives you a practical starting point, and small evidence of progress can help confidence grow.`,
       actions: [
-        "Write down the one thing that matters most right now, then separate what you know from what you are assuming.",
-        `Starting from “${sharedKeywords[0] || "gentle resolve"},” choose one small action you can complete today.`,
-        "Give yourself a clear time to observe what changes, then adjust using what is actually happening.",
+        `Write one sentence beginning with “What I can influence in this question is…” and name one real choice.`,
+        `Turn ${primaryKeyword} into one small action you can complete within the next 24 hours.`,
+        "At the end of the day, record one piece of evidence that you handled the situation with more clarity or care.",
       ],
-      reflection: "If you did not have to prove that your choice was right, what direction would you honestly want to explore?",
+      reflection: `What would a hopeful but realistic next step for “${question}” look like if you trusted your ability to adjust along the way?`,
     },
     zh: {
-      summary: `这些牌邀请你在${sharedKeywordsZh.slice(0, 2).join("与") || "觉察与行动"}之间，重新找到自己的节奏。`,
-      connections: `${first.nameZh}${first.orientation === "Reversed" ? "逆位" : "正位"}落在“${first.positionZh}”，邀请你看见此刻最需要照顾的部分。${last.nameZh}${last.orientation === "Reversed" ? "逆位" : "正位"}位于“${last.positionZh}”，温柔地把注意力带回你仍然可以作出的选择。正位与逆位并非好坏之分，而是同一种能量的不同表达。`,
-      encouragement: `你不必一次解决“${question}”里的所有不确定。愿意停下来认真发问，说明你正在尊重自己的感受；这本身就已经是一个有意义的开始。`,
+      summary: `面对“${question}”，这些牌把积极的突破口指向${primaryKeywordZh}。`,
+      connections: `紧扣“${question}”来看，${cardConnectionsZh}整组牌并没有把你推向一个固定结局，而是把注意力带回仍在你掌握之中的选择：先看见可以调用的力量，再从那里建立新的可能。`,
+      encouragement: `这个问题并不是一条死路。你愿意认真面对它，本身就说明你拥有改变回应方式的能力。你不需要等到完全确定才开始行动；从${primaryKeywordZh}出发，哪怕只是获得一点真实的进展，也会帮助你重新建立信心。`,
       actions: [
-        "写下此刻最重要的一件事，再把已经知道的事实与自己的猜测分开。",
-        `从“${sharedKeywordsZh[0] || "温柔的坚定"}”出发，选择一件今天可以完成的小事。`,
-        "为观察变化设定一个明确时间，再根据真实发生的情况调整下一步。",
+        "写下一句“在这个问题里，我仍然能够影响的是……”，并填入一个真实选择。",
+        `把${primaryKeywordZh}变成一件能在未来 24 小时内完成的小行动。`,
+        "今天结束时，记录一条证据：你已经比之前更清晰或更温柔地处理了这件事。",
       ],
-      reflection: "如果不需要向任何人证明自己的选择是正确的，你真正想探索的方向是什么？",
+      reflection: `如果相信自己可以边走边调整，“${question}”最积极而现实的下一步会是什么？`,
     },
   };
 }
@@ -53,29 +73,47 @@ function buildPrompt(question, cards, preferredLanguage) {
 
   return `The user's preferred interface language is ${preferredLanguage === "zh" ? "Simplified Chinese" : "English"}.
 
-The user's question:
+THE USER'S EXACT QUESTION — this is the single center of the reading:
 ${question}
 
-The spread:
+THE DRAWN SPREAD:
 ${spread}
 
-Connect the spread positions, card meanings, orientations, and relationships between the cards. Upright and reversed describe different ways an energy may be expressed; they do not mean simply good or bad.
+NON-NEGOTIABLE QUESTION FOCUS:
+- Directly answer the user's exact question. Do not turn it into a general life reading or a generic explanation of tarot.
+- Every section must contain insight that is specific to this question. If the question were replaced with a different question, the reading should no longer make sense.
+- Use the user's concrete situation, concern, or desired direction throughout. Do not merely repeat the question.
+- Connect every drawn card, its spread position, and its orientation to a distinct part of the question.
+
+CONSTRUCTIVE INTERPRETATION:
+- Interpret every card from a supportive, forward-looking angle. Challenging cards and reversed cards must become useful signals about a strength to develop, a pattern to understand, a boundary to protect, an opportunity to notice, or a choice the user can make.
+- You may acknowledge a difficulty briefly and honestly, but immediately show the constructive meaning and the user's available path forward.
+- Positive does not mean making promises. Never guarantee a desired outcome or say that everything will certainly work out. Create grounded hope through agency, clarity, resources, and realistic action.
+- Never use frightening, fatalistic, discouraging, shaming, or dependency-forming language.
+
+CONTENT STANDARD:
+- The summary must directly answer the question with one clear, hopeful core message.
+- The connections section must synthesize the cards into a question-specific answer, not list isolated textbook meanings.
+- The encouragement must name a real strength, resource, opportunity, or choice visible in this particular spread.
+- Each action must begin with a clear verb, be achievable within 24 hours or this week, and directly help with the user's question.
+- The reflection question must open a constructive next step and keep the user's agency central.
+- Avoid vague spiritual clichés, generic reassurance, and empty positivity.
 
 Return the same reading in natural English and natural Simplified Chinese. The two versions must carry the same meaning and specificity. Return only a JSON object without a Markdown code fence:
 {
   "en": {
-    "summary": "a gentle and specific core theme in 12 words or fewer",
-    "connections": "how the cards and positions connect, 90-150 words",
-    "encouragement": "grounded encouragement tailored to the question, 60-100 words",
-    "actions": ["specific small action 1", "specific small action 2", "specific small action 3"],
-    "reflection": "one thoughtful question for continued reflection"
+    "summary": "one direct, hopeful answer to the exact question in 18 words or fewer",
+    "connections": "a tightly question-specific synthesis of every card and spread position, 110-180 words",
+    "encouragement": "grounded positive guidance naming the user's real strength or opportunity, 60-100 words",
+    "actions": ["question-specific action beginning with a verb", "question-specific action beginning with a verb", "question-specific action beginning with a verb"],
+    "reflection": "one constructive question that increases agency"
   },
   "zh": {
-    "summary": "自然、具体、简洁的中文核心主题",
-    "connections": "用自然简体中文说明牌与牌阵位置如何连接",
-    "encouragement": "针对问题、克制而真诚的中文鼓励",
-    "actions": ["具体可行的小行动 1", "具体可行的小行动 2", "具体可行的小行动 3"],
-    "reflection": "一个值得继续思考的问题"
+    "summary": "一句直接回答用户原问题、积极而不空泛的核心信息",
+    "connections": "紧扣原问题，综合说明每张牌、牌位和正逆位如何共同给出正向答案",
+    "encouragement": "指出这副牌中与原问题直接相关的真实力量、资源、机会或选择",
+    "actions": ["以动词开头、直接帮助原问题的具体行动", "以动词开头、直接帮助原问题的具体行动", "以动词开头、直接帮助原问题的具体行动"],
+    "reflection": "一个能够增加主动性并打开积极下一步的问题"
   }
 }`;
 }
@@ -142,7 +180,7 @@ async function requestDeepSeek(env, systemPrompt, userPrompt) {
       ],
       response_format: { type: "json_object" },
       thinking: { type: "disabled" },
-      temperature: 0.7,
+      temperature: 0.55,
       max_tokens: 1500,
     }),
   });
@@ -201,14 +239,20 @@ export async function onRequestPost(context) {
       : [],
   }));
 
-  const systemPrompt = `You are Soluna, a warm, clear-minded bilingual tarot reflection guide who respects the user's autonomy.
-Your purpose is not to predict the future. Use the cards to help the user organize their feelings, notice their resources, and find a small, realistic next step.
-Follow these principles:
-1. Write in natural, restrained, warm English and Simplified Chinese. Avoid literal translation, stiff wording, and vague spiritual clichés.
-2. Never claim to know another person's private thoughts, promise that an event will happen, or create fear or dependence.
-3. Never present tarot as a basis for medical, legal, financial, or other high-stakes decisions.
-4. Explain the cards faithfully before connecting them to the question. Present interpretation as possibility, not fact.
-5. Keep the user's agency central. Suggestions must be practical, gentle, and non-manipulative.`;
+  const systemPrompt = `You are Soluna, a warm, clear-minded bilingual tarot reflection guide.
+Your sole task is to answer the user's exact question through the drawn cards from a constructive, empowering perspective.
+
+NON-NEGOTIABLE PRINCIPLES:
+1. QUESTION FIRST. Stay tightly anchored to the user's original question in every section. Never drift into a broad life reading, a generic tarot lesson, or unrelated advice.
+2. CONSTRUCTIVE LENS. Interpret every card—including traditionally challenging or reversed cards—as a useful path toward clarity, growth, protection, resilience, opportunity, choice, or practical improvement.
+3. GROUNDED POSITIVITY. Acknowledge real difficulty without dwelling on it, then clearly identify what can help. Do not use empty reassurance such as “everything will be fine.”
+4. CARD-BASED REASONING. Use every drawn card, its position, orientation, and relationship to the other cards. Do not paste disconnected card definitions.
+5. USER AGENCY. Keep the user's strengths, choices, resources, and achievable next steps at the center. Every paragraph should leave the user with more clarity, hope, or ability to act.
+6. HONESTY. Tarot is a reflection tool, not a prediction. Never claim to know another person's private thoughts, guarantee an outcome, or create fear, shame, fatalism, or dependence.
+7. SAFETY. Never present tarot as a basis for medical, legal, financial, or other high-stakes decisions.
+8. BILINGUAL QUALITY. Write natural, specific English and natural Simplified Chinese with equivalent meaning. Avoid literal translation, stiff wording, vague spiritual clichés, and generic encouragement.
+
+Before returning the JSON, verify silently that every section directly helps answer this exact question, every card is used, and every difficult symbol has been translated into a realistic constructive insight.`;
   const userPrompt = buildPrompt(question, safeCards, preferredLanguage);
 
   if (context.env?.DEEPSEEK_API_KEY) {
@@ -271,7 +315,7 @@ Follow these principles:
             required: ["en", "zh"],
           },
         },
-        temperature: 0.7,
+        temperature: 0.55,
         max_tokens: 1500,
       });
 
