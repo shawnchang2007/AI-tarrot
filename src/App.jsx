@@ -4,6 +4,7 @@ import { drawCards, spreadPositions } from "./data/tarot";
 const translations = {
   en: {
     documentTitle: "Soluna · Ask the Stars Within",
+    ritualDocumentTitle: "Soluna · Your Ritual",
     metaDescription: "A gentle, AI-guided tarot reflection to help you notice your strengths and find a thoughtful next step.",
     navigation: "Main navigation",
     home: "Soluna home",
@@ -29,8 +30,29 @@ const translations = {
     ],
     deckNote: "Drawing from the complete 78-card Soluna deck, with original artwork for every card.",
     questionTooShort: "Share a little more so Soluna can better understand what is on your mind.",
-    shuffle: "Shuffle and draw",
-    revealKicker: "02 · Reveal the constellation",
+    shuffle: "Enter the ritual",
+    exitRitual: "Leave the ritual",
+    yourIntention: "The question you are carrying",
+    ritualSteps: ["Flame", "Breath", "Draw"],
+    candleKicker: "The threshold · 01",
+    candleTitle: "Light a quiet flame",
+    candleCopy: "Let this small light mark the moment you turn your attention inward.",
+    candleInstruction: "Touch the candle to light it",
+    lightCandle: "Light the candle",
+    candleLit: "The flame is lit",
+    continueToBreath: "Continue to the breath",
+    breatheKicker: "The threshold · 02",
+    breatheTitle: "Take one slow breath",
+    breatheCopy: "For three seconds, breathe in gently and hold your question without trying to solve it.",
+    beginBreath: "Begin the 3-second breath",
+    breatheIn: "Breathe in",
+    breathReady: "Breath complete",
+    breathComplete: "Your question is here. You do not need to force an answer.",
+    continueToDraw: "I am ready to draw",
+    shuffleKicker: "The threshold · 03",
+    shuffleTitle: "The deck is listening",
+    shuffleCopy: "Keep your question softly in mind while the cards find their place.",
+    revealKicker: "03 · Reveal the constellation",
     revealedTitle: "Your cards are revealed",
     revealTitle: "Turn each card when it feels right",
     revealedCopy: "Upright and reversed are not good or bad—only different angles of reflection.",
@@ -57,6 +79,7 @@ const translations = {
   },
   zh: {
     documentTitle: "Soluna · 向内心的星辰发问",
+    ritualDocumentTitle: "Soluna · 你的占卜仪式",
     metaDescription: "一次温柔的 AI 塔罗观照，陪你看见自己的力量，并找到清晰而实际的下一步。",
     navigation: "主导航",
     home: "Soluna 首页",
@@ -82,8 +105,29 @@ const translations = {
     ],
     deckNote: "从完整的 78 张 Soluna 塔罗牌中抽取，每张牌都拥有独立原创画面。",
     questionTooShort: "请再多写一点，让 Soluna 更好地理解你此刻的想法。",
-    shuffle: "洗牌并抽取",
-    revealKicker: "02 · 揭开星图",
+    shuffle: "进入占卜仪式",
+    exitRitual: "离开仪式",
+    yourIntention: "此刻萦绕在你心中的问题",
+    ritualSteps: ["点烛", "呼吸", "抽牌"],
+    candleKicker: "进入仪式 · 01",
+    candleTitle: "点亮一束安静的烛光",
+    candleCopy: "让这一点微光成为界线，从日常的纷扰中，慢慢回到自己的内心。",
+    candleInstruction: "轻触蜡烛，将它点亮",
+    lightCandle: "点亮蜡烛",
+    candleLit: "烛光已经亮起",
+    continueToBreath: "继续，回到呼吸",
+    breatheKicker: "进入仪式 · 02",
+    breatheTitle: "做一次缓慢的深呼吸",
+    breatheCopy: "用三秒钟轻轻吸气，把问题放在心里；此刻不必急着寻找答案。",
+    beginBreath: "开始三秒呼吸",
+    breatheIn: "缓缓吸气",
+    breathReady: "呼吸完成",
+    breathComplete: "你的问题已经被听见，不需要勉强自己立刻得到答案。",
+    continueToDraw: "我准备好抽牌了",
+    shuffleKicker: "进入仪式 · 03",
+    shuffleTitle: "让牌组聆听你的问题",
+    shuffleCopy: "在心里轻轻想着它，让属于你的牌慢慢找到位置。",
+    revealKicker: "03 · 揭开星图",
     revealedTitle: "你的牌已经全部揭晓",
     revealTitle: "在感觉合适的时候，翻开每张牌",
     revealedCopy: "正位与逆位并非好坏之分，而是同一种能量的不同视角。",
@@ -339,6 +383,214 @@ function TarotCard({ card, index, language, onReveal, t }) {
   );
 }
 
+function LanguageSwitch({ language, onChange, t }) {
+  return (
+    <div
+      className="language-switch"
+      role="group"
+      aria-label={language === "zh" ? "语言切换" : "Language selector"}
+    >
+      <button
+        className={language === "en" ? "is-active" : ""}
+        type="button"
+        onClick={() => onChange("en")}
+        aria-label={t.switchToEnglish}
+        aria-pressed={language === "en"}
+      >
+        EN
+      </button>
+      <button
+        className={language === "zh" ? "is-active" : ""}
+        type="button"
+        onClick={() => onChange("zh")}
+        aria-label={t.switchToChinese}
+        aria-pressed={language === "zh"}
+      >
+        中文
+      </button>
+    </div>
+  );
+}
+
+function SiteNav({ language, onLanguageChange, onExitRitual, ritual, t }) {
+  return (
+    <nav className={`nav-shell ${ritual ? "ritual-nav" : ""}`} aria-label={t.navigation}>
+      <a
+        className="brand"
+        href={ritual ? "/" : "#top"}
+        aria-label={ritual ? t.exitRitual : t.home}
+        onClick={ritual ? onExitRitual : undefined}
+      >
+        <span className="brand-mark">◐</span>
+        <span>SOLUNA</span>
+      </a>
+      <div className="nav-actions">
+        {ritual ? (
+          <button className="ritual-exit" type="button" onClick={onExitRitual}>
+            {t.exitRitual}
+          </button>
+        ) : (
+          <span className="nav-whisper">{t.navWhisper}</span>
+        )}
+        <LanguageSwitch language={language} onChange={onLanguageChange} t={t} />
+      </div>
+    </nav>
+  );
+}
+
+function RitualProgress({ stage, t }) {
+  const activeIndex = stage === "candle" ? 0 : stage === "breathe" ? 1 : 2;
+
+  return (
+    <ol className="ritual-progress" aria-label={t.ritualDocumentTitle}>
+      {t.ritualSteps.map((label, index) => (
+        <li
+          key={label}
+          className={
+            index < activeIndex
+              ? "is-complete"
+              : index === activeIndex
+                ? "is-current"
+                : ""
+          }
+          aria-current={index === activeIndex ? "step" : undefined}
+        >
+          <span>{index < activeIndex ? "✦" : `0${index + 1}`}</span>
+          {label}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function RitualQuestion({ question, t }) {
+  return (
+    <div className="ritual-question">
+      <span>{t.yourIntention}</span>
+      <p>“{question}”</p>
+    </div>
+  );
+}
+
+function CandleStage({ lit, onLight, onContinue, question, t }) {
+  return (
+    <section className="ritual-stage candle-stage">
+      <div className="ritual-stage-copy">
+        <span className="section-kicker">{t.candleKicker}</span>
+        <h1>{t.candleTitle}</h1>
+        <p>{t.candleCopy}</p>
+      </div>
+
+      <button
+        className={`candle-interaction ${lit ? "is-lit" : ""}`}
+        type="button"
+        onClick={onLight}
+        aria-label={lit ? t.candleLit : t.lightCandle}
+        aria-pressed={lit}
+      >
+        <span className="candle-glow" aria-hidden="true" />
+        <span className="candle-visual" aria-hidden="true">
+          <span className="candle-flame">
+            <span className="candle-flame-core" />
+          </span>
+          <span className="candle-wick" />
+          <span className="candle-wax">
+            <span className="wax-drip wax-drip-one" />
+            <span className="wax-drip wax-drip-two" />
+          </span>
+          <span className="candle-pool" />
+        </span>
+        <small>{lit ? t.candleLit : t.candleInstruction}</small>
+      </button>
+
+      <RitualQuestion question={question} t={t} />
+
+      <div className={`ritual-stage-action ${lit ? "is-visible" : ""}`}>
+        <button className="primary-button" type="button" onClick={onContinue}>
+          <span>{t.continueToBreath}</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function BreathStage({
+  breathComplete,
+  breathCount,
+  isBreathing,
+  onContinue,
+  onStart,
+  question,
+  t,
+}) {
+  return (
+    <section className="ritual-stage breath-stage">
+      <div className="ritual-stage-copy">
+        <span className="section-kicker">{t.breatheKicker}</span>
+        <h1>{t.breatheTitle}</h1>
+        <p>{t.breatheCopy}</p>
+      </div>
+
+      <button
+        className={`breath-control ${isBreathing ? "is-breathing" : ""} ${breathComplete ? "is-complete" : ""}`}
+        type="button"
+        onClick={onStart}
+        disabled={isBreathing || breathComplete}
+        aria-label={t.beginBreath}
+      >
+        <span className="breath-orbit breath-orbit-one" aria-hidden="true" />
+        <span className="breath-orbit breath-orbit-two" aria-hidden="true" />
+        <span className="breath-core">
+          <strong>{breathComplete ? "✦" : breathCount}</strong>
+          <small>
+            {isBreathing
+              ? t.breatheIn
+              : breathComplete
+                ? t.breathReady
+                : t.beginBreath}
+          </small>
+        </span>
+      </button>
+
+      <p className="breath-status" aria-live="polite">
+        {breathComplete ? t.breathComplete : isBreathing ? `${t.breatheIn} · ${breathCount}` : " "}
+      </p>
+
+      <RitualQuestion question={question} t={t} />
+
+      <div className={`ritual-stage-action ${breathComplete ? "is-visible" : ""}`}>
+        <button className="primary-button" type="button" onClick={onContinue}>
+          <span>{t.continueToDraw}</span>
+          <span aria-hidden="true">✦</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function ShuffleStage({ question, t }) {
+  return (
+    <section className="ritual-stage shuffle-stage" aria-live="polite">
+      <div className="ritual-stage-copy">
+        <span className="section-kicker">{t.shuffleKicker}</span>
+        <h1>{t.shuffleTitle}</h1>
+        <p>{t.shuffleCopy}</p>
+      </div>
+
+      <div className="shuffle-deck" aria-hidden="true">
+        {Array.from({ length: 5 }, (_, index) => (
+          <span className={`shuffle-card shuffle-card-${index + 1}`} key={index}>
+            <span>◐</span>
+          </span>
+        ))}
+      </div>
+
+      <RitualQuestion question={question} t={t} />
+    </section>
+  );
+}
+
 function Reading({ language, reading, t }) {
   if (!reading) return null;
   const localizedReading = reading[language] || reading;
@@ -380,14 +632,42 @@ function Reading({ language, reading, t }) {
   );
 }
 
+function readStoredRitual() {
+  try {
+    const stored = JSON.parse(window.sessionStorage.getItem("soluna-ritual") || "null");
+    if (
+      stored &&
+      typeof stored.question === "string" &&
+      [1, 3, 5].includes(Number(stored.count))
+    ) {
+      return {
+        question: stored.question,
+        count: Number(stored.count),
+      };
+    }
+  } catch {
+    // Ignore an invalid or unavailable session store.
+  }
+  return null;
+}
+
 export default function App() {
+  const initialRitual = useMemo(() => readStoredRitual(), []);
+  const startsInRitual =
+    window.location.pathname === "/reading" && Boolean(initialRitual?.question);
   const [language, setLanguage] = useState(() => {
     const savedLanguage = window.localStorage.getItem("soluna-language");
     if (savedLanguage === "en" || savedLanguage === "zh") return savedLanguage;
     return window.navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
   });
-  const [question, setQuestion] = useState("");
-  const [count, setCount] = useState(3);
+  const [view, setView] = useState(startsInRitual ? "ritual" : "home");
+  const [ritualStage, setRitualStage] = useState("candle");
+  const [candleLit, setCandleLit] = useState(false);
+  const [isBreathing, setIsBreathing] = useState(false);
+  const [breathComplete, setBreathComplete] = useState(false);
+  const [breathCount, setBreathCount] = useState(3);
+  const [question, setQuestion] = useState(initialRitual?.question || "");
+  const [count, setCount] = useState(initialRitual?.count || 3);
   const [cards, setCards] = useState([]);
   const [reading, setReading] = useState(null);
   const [status, setStatus] = useState("idle");
@@ -398,12 +678,67 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = language === "zh" ? "zh-CN" : "en";
-    document.title = t.documentTitle;
+    document.title = view === "ritual" ? t.ritualDocumentTitle : t.documentTitle;
     document
       .querySelector('meta[name="description"]')
       ?.setAttribute("content", t.metaDescription);
+    document.body.classList.toggle("ritual-active", view === "ritual");
     window.localStorage.setItem("soluna-language", language);
-  }, [language, t.documentTitle, t.metaDescription]);
+  }, [language, t.documentTitle, t.metaDescription, t.ritualDocumentTitle, view]);
+
+  useEffect(() => {
+    if (window.location.pathname === "/reading" && !initialRitual?.question) {
+      window.history.replaceState({}, "", "/");
+    }
+
+    function handleHistoryChange() {
+      const storedRitual = readStoredRitual();
+      if (window.location.pathname === "/reading" && storedRitual?.question) {
+        setQuestion(storedRitual.question);
+        setCount(storedRitual.count);
+        setView("ritual");
+        setRitualStage("candle");
+        setCandleLit(false);
+        setBreathComplete(false);
+      } else {
+        setView("home");
+      }
+    }
+
+    window.addEventListener("popstate", handleHistoryChange);
+    return () => window.removeEventListener("popstate", handleHistoryChange);
+  }, [initialRitual]);
+
+  useEffect(() => {
+    if (!isBreathing) return undefined;
+
+    let remaining = 3;
+    setBreathCount(remaining);
+    const timer = window.setInterval(() => {
+      remaining -= 1;
+      setBreathCount(Math.max(remaining, 0));
+      if (remaining <= 0) {
+        window.clearInterval(timer);
+        setIsBreathing(false);
+        setBreathComplete(true);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [isBreathing]);
+
+  useEffect(() => {
+    if (ritualStage !== "shuffle") return undefined;
+
+    const timer = window.setTimeout(() => {
+      setCards(drawCards(count, language));
+      setStatus("drawn");
+      setRitualStage("cards");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 2600);
+
+    return () => window.clearTimeout(timer);
+  }, [count, language, ritualStage]);
 
   function changeLanguage(nextLanguage) {
     if (nextLanguage === language) return;
@@ -419,7 +754,7 @@ export default function App() {
     );
   }
 
-  function handleDraw(event) {
+  function beginRitual(event) {
     event.preventDefault();
     const cleanQuestion = question.trim();
     if (cleanQuestion.length < 4) {
@@ -429,11 +764,20 @@ export default function App() {
 
     setError("");
     setReading(null);
-    setCards(drawCards(count, language));
-    setStatus("drawn");
-    requestAnimationFrame(() => {
-      document.getElementById("card-table")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    setCards([]);
+    setStatus("idle");
+    setRitualStage("candle");
+    setCandleLit(false);
+    setIsBreathing(false);
+    setBreathComplete(false);
+    setBreathCount(3);
+    window.sessionStorage.setItem(
+      "soluna-ritual",
+      JSON.stringify({ question: cleanQuestion, count }),
+    );
+    window.history.pushState({}, "", "/reading");
+    setView("ritual");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function revealCard(index) {
@@ -446,6 +790,19 @@ export default function App() {
 
   function revealAll() {
     setCards((current) => current.map((card) => ({ ...card, revealed: true })));
+  }
+
+  function startBreath() {
+    if (isBreathing || breathComplete) return;
+    setBreathCount(3);
+    setIsBreathing(true);
+  }
+
+  function beginShuffle() {
+    if (!breathComplete) return;
+    setCards([]);
+    setStatus("shuffling");
+    setRitualStage("shuffle");
   }
 
   async function requestReading() {
@@ -486,46 +843,133 @@ export default function App() {
     }
   }
 
-  function reset() {
+  function exitRitual(event) {
+    event?.preventDefault();
+    setView("home");
+    setRitualStage("candle");
+    setCandleLit(false);
+    setIsBreathing(false);
+    setBreathComplete(false);
     setCards([]);
     setReading(null);
     setStatus("idle");
     setError("");
-    document.getElementById("ask")?.scrollIntoView({ behavior: "smooth" });
+    window.history.pushState({}, "", "/");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function reset() {
+    window.sessionStorage.removeItem("soluna-ritual");
+    setQuestion("");
+    setCount(3);
+    exitRitual();
+  }
+
+  if (view === "ritual") {
+    return (
+      <main className={`ritual-page ${language === "zh" ? "language-zh" : "language-en"}`}>
+        <StarField />
+        <SiteNav
+          language={language}
+          onLanguageChange={changeLanguage}
+          onExitRitual={exitRitual}
+          ritual
+          t={t}
+        />
+
+        <div className="ritual-shell">
+          <RitualProgress stage={ritualStage} t={t} />
+
+          {ritualStage === "candle" && (
+            <CandleStage
+              lit={candleLit}
+              onContinue={() => setRitualStage("breathe")}
+              onLight={() => setCandleLit(true)}
+              question={question}
+              t={t}
+            />
+          )}
+
+          {ritualStage === "breathe" && (
+            <BreathStage
+              breathComplete={breathComplete}
+              breathCount={breathCount}
+              isBreathing={isBreathing}
+              onContinue={beginShuffle}
+              onStart={startBreath}
+              question={question}
+              t={t}
+            />
+          )}
+
+          {ritualStage === "shuffle" && <ShuffleStage question={question} t={t} />}
+
+          {ritualStage === "cards" && (
+            <section className="ritual-card-stage" id="card-table">
+              <div className="section-heading centered ritual-card-heading">
+                <span className="section-kicker">{t.revealKicker}</span>
+                <h1>{allRevealed ? t.revealedTitle : t.revealTitle}</h1>
+                <p>{allRevealed ? t.revealedCopy : t.revealCopy}</p>
+              </div>
+
+              <div className={`cards-grid cards-${cards.length}`}>
+                {cards.map((card, index) => (
+                  <TarotCard
+                    key={`${card.id}-${index}`}
+                    card={card}
+                    index={index}
+                    language={language}
+                    onReveal={revealCard}
+                    t={t}
+                  />
+                ))}
+              </div>
+
+              <div className="card-actions">
+                {!allRevealed && (
+                  <button className="text-button" type="button" onClick={revealAll}>
+                    {t.revealAll}
+                  </button>
+                )}
+                {allRevealed && status !== "complete" && (
+                  <button
+                    className="primary-button"
+                    type="button"
+                    onClick={requestReading}
+                    disabled={status === "reading"}
+                  >
+                    <span>{status === "reading" ? t.listening : t.askSoluna}</span>
+                    <span className={status === "reading" ? "spinner" : ""} aria-hidden="true">☾</span>
+                  </button>
+                )}
+              </div>
+
+              {error && (
+                <p className="form-error centered-error" role="alert">
+                  {error}
+                </p>
+              )}
+
+              <Reading language={language} reading={reading} t={t} />
+
+              {reading && (
+                <div className="restart-wrap">
+                  <button className="text-button" type="button" onClick={reset}>
+                    {t.restart}
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
+        </div>
+      </main>
+    );
   }
 
   return (
-    <main className={language === "zh" ? "language-zh" : "language-en"}>
+    <main className={`home-page ${language === "zh" ? "language-zh" : "language-en"}`}>
       <StarField />
-      <nav className="nav-shell" aria-label={t.navigation}>
-        <a className="brand" href="#top" aria-label={t.home}>
-          <span className="brand-mark">◐</span>
-          <span>SOLUNA</span>
-        </a>
-        <div className="nav-actions">
-          <span className="nav-whisper">{t.navWhisper}</span>
-          <div className="language-switch" role="group" aria-label={language === "zh" ? "语言切换" : "Language selector"}>
-            <button
-              className={language === "en" ? "is-active" : ""}
-              type="button"
-              onClick={() => changeLanguage("en")}
-              aria-label={t.switchToEnglish}
-              aria-pressed={language === "en"}
-            >
-              EN
-            </button>
-            <button
-              className={language === "zh" ? "is-active" : ""}
-              type="button"
-              onClick={() => changeLanguage("zh")}
-              aria-label={t.switchToChinese}
-              aria-pressed={language === "zh"}
-            >
-              中文
-            </button>
-          </div>
-        </div>
-      </nav>
+      <SiteNav language={language} onLanguageChange={changeLanguage} ritual={false} t={t} />
 
       <header className="hero" id="top">
         <div className="celestial-symbol" aria-hidden="true">
@@ -558,7 +1002,7 @@ export default function App() {
           <p>{t.askCopy}</p>
         </div>
 
-        <form className="question-form" onSubmit={handleDraw}>
+        <form className="question-form" onSubmit={beginRitual}>
           <label htmlFor="question">{t.questionLabel}</label>
           <div className="textarea-wrap">
             <textarea
@@ -594,66 +1038,13 @@ export default function App() {
             </p>
           </fieldset>
 
-          {error && cards.length === 0 && <p className="form-error" role="alert">{error}</p>}
+          {error && <p className="form-error" role="alert">{error}</p>}
           <button className="primary-button" type="submit">
             <span>{t.shuffle}</span>
             <span aria-hidden="true">✦</span>
           </button>
         </form>
       </section>
-
-      {cards.length > 0 && (
-        <section className="card-table" id="card-table">
-          <div className="section-heading centered">
-            <span className="section-kicker">{t.revealKicker}</span>
-            <h2>{allRevealed ? t.revealedTitle : t.revealTitle}</h2>
-            <p>{allRevealed ? t.revealedCopy : t.revealCopy}</p>
-          </div>
-
-          <div className={`cards-grid cards-${cards.length}`}>
-            {cards.map((card, index) => (
-              <TarotCard
-                key={`${card.id}-${index}`}
-                card={card}
-                index={index}
-                language={language}
-                onReveal={revealCard}
-                t={t}
-              />
-            ))}
-          </div>
-
-          <div className="card-actions">
-            {!allRevealed && (
-              <button className="text-button" type="button" onClick={revealAll}>
-                {t.revealAll}
-              </button>
-            )}
-            {allRevealed && status !== "complete" && (
-              <button
-                className="primary-button"
-                type="button"
-                onClick={requestReading}
-                disabled={status === "reading"}
-              >
-                <span>{status === "reading" ? t.listening : t.askSoluna}</span>
-                <span className={status === "reading" ? "spinner" : ""} aria-hidden="true">☾</span>
-              </button>
-            )}
-          </div>
-          {error && cards.length > 0 && <p className="form-error centered-error" role="alert">{error}</p>}
-        </section>
-      )}
-
-      <Reading language={language} reading={reading} t={t} />
-
-      {reading && (
-        <div className="restart-wrap">
-          <button className="text-button" type="button" onClick={reset}>
-            {t.restart}
-          </button>
-        </div>
-      )}
 
       <footer>
         <a className="brand footer-brand" href="#top">
